@@ -1,6 +1,7 @@
 package model;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Vector;
 
 public class Window extends RectangularArea {
@@ -48,20 +49,54 @@ public class Window extends RectangularArea {
 		System.out.println("Resize: " + this);
 	}
 
+	public RectangularPart toPart() {
+		return new RectangularPart(this.getLeftUpperCorner(), this.getWidth(),
+				this.getHeight());
+	}
+
 	public RectangularPartCollection getVisibleContext() {
 		// TODO (1) implement calculation of visible parts
+		System.out.println("ich werd aufgerufen");
 		RectangularPartCollection result = new RectangularPartCollection();
 		if (this.isOpen()) {
-			RectangularPart meAsPart = new RectangularPart(
-					this.getLeftUpperCorner(), this.getWidth(),
-					this.getHeight());
-			try {
-				meAsPart.setParent(this);
-			} catch (HierarchyException e) {
-				throw new Error("Hierarchy shall be guaranteed!");
+			if (this.getAboveMe().isEmpty()) {
+				RectangularPart meAsPart = new RectangularPart(
+						this.getLeftUpperCorner(), this.getWidth(),
+						this.getHeight());
+				try {
+					meAsPart.setParent(this);
+				} catch (HierarchyException e) {
+					throw new Error("Hierarchy shall be guaranteed!");
+				}
+				result.add(meAsPart);
+			} else {
+				Iterator<Window> i = this.getAboveMe().iterator();
+				while (i.hasNext()) {
+					Window current = i.next();
+					RectangularPartCollection before = current
+							.getVisibleContext();
+					result.add(this.calculateVisibleParts(before));
+				}
 			}
-			result.add(meAsPart);
 		}
+		return result;
+	}
+
+	private RectangularPartCollection calculateVisibleParts(
+			RectangularPartCollection before) {
+		RectangularPartCollection result = new RectangularPartCollection();
+		RectangularPart meAsPart = this.toPart();
+
+		Iterator<RectangularPart> i = before.getParts().iterator();
+		while (i.hasNext()) {
+			RectangularPart current = i.next();
+			if (current.isPartOf(meAsPart)) {
+
+			} else {
+				result.add(current);
+			}
+		}
+
 		return result;
 	}
 
