@@ -15,6 +15,24 @@ public class Point {
 		this.setY(this.getY() + deltaY);
 	}
 
+	public static boolean linksVon(Point p1, Point p2) {
+		return p1.getX() < p2.getX();
+	}
+
+	public static boolean unter(Point p1, Point p2) {
+		return p1.getY() < p2.getY();
+	}
+
+	/**
+	 * Returns true if the Point <this> has a greater or equal x- and y-value.
+	 * 
+	 * @param p
+	 * @return
+	 */
+	public static boolean weiterDraußen(Point p1, Point p2) {
+		return !linksVon(p1, p2) & !unter(p1, p2);
+	}
+
 	public int getX() {
 		return x;
 	}

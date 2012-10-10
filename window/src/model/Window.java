@@ -91,7 +91,18 @@ public class Window extends RectangularArea {
 		while (i.hasNext()) {
 			RectangularPart current = i.next();
 			if (current.isPartOf(meAsPart)) {
-
+				if (this.isSpaceEast(current)) {
+					result.add(this.calculateSpaceEast(current));
+				}
+				if (this.isSpaceWest(current)) {
+					result.add(this.calculateSpaceWest(current));
+				}
+				if (this.isSpaceNorth(current)) {
+					result.add(this.calculateSpaceNorth(current));
+				}
+				if (this.isSpaceSouth(current)) {
+					result.add(this.calculateSpaceSouth(current));
+				}
 			} else {
 				result.add(current);
 			}
