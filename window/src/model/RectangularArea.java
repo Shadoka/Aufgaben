@@ -50,49 +50,66 @@ abstract public class RectangularArea {
 	}
 
 	/**
-	 * Method provides true, if the two RectangularAreas are overlapping.
-	 * Provides also true, when just the edges are overlapping.
-	 * 
-	 * @param parent
-	 *            : RectangularArea
-	 * @return : boolean
+	 * Returns true if and only if this overlaps part or part overlaps this.
 	 */
-	public boolean isPartOf(RectangularArea parent) {
-		// if (this.getLeftUpperCorner().getY() < parent.getLeftUpperCorner()
-		// .getY()) {
-		// return haveSameSpace(this, parent);
-		// } else {
-		// return haveSameSpace(parent, this);
-		// }
+	public boolean overlaps(RectangularArea part) {
+		RectangularArea aroundRect = this.getBoundingRectangle(part);
 
-		return Point.weiterDraußen(this.getLeftUpperCorner(),
-				parent.getLeftUpperCorner())
-				& this.getLeftUpperCorner().getY() + this.getHeight() <= parent
-						.getLeftUpperCorner().getY() + parent.getHeight()
-				& this.getLeftUpperCorner().getX() + this.getWidth() <= parent
-						.getLeftUpperCorner().getX() + parent.getWidth();
+		boolean overlapsHorizontal = aroundRect.getWidth() < this.getWidth()
+				+ part.getWidth();
+		boolean overlapsVertical = aroundRect.getHeight() < this.getHeight()
+				+ part.getHeight();
+
+		return overlapsHorizontal && overlapsVertical;
 	}
 
-	private boolean haveSameSpace(RectangularArea area1, RectangularArea area2) {
-		Point newCornerThis = new Point(area1.getLeftUpperCorner().getX(), 0);
-		Point newCornerParent = new Point(area2.getLeftUpperCorner().getX(),
-				area2.getLeftUpperCorner().getY()
-						- area1.getLeftUpperCorner().getY());
-		if (newCornerThis.getX() < newCornerParent.getX()) {
-			newCornerParent.setX(newCornerParent.getX() - newCornerThis.getX());
-			newCornerThis.setX(0);
-			return newCornerThis.getY() + area1.getHeight() > newCornerParent
-					.getY()
-					|| newCornerThis.getX() + area1.getWidth() >= newCornerParent
-							.getX();
-		} else {
-			newCornerThis.setX(newCornerThis.getX() - newCornerParent.getX());
-			newCornerParent.setX(0);
-			return newCornerThis.getY() + area1.getHeight() >= newCornerParent
-					.getY()
-					|| newCornerParent.getX() + area2.getWidth() >= newCornerThis
-							.getX();
-		}
+	/**
+	 * Returns the smallest RectangularPart that contains this and part.
+	 */
+	private RectangularArea getBoundingRectangle(RectangularArea part) {
+		return new RectangularPart(
+				this.getPointOfBoundingRectangularPart(part),
+				this.getWidthOfBoundingRectangularPart(part),
+				this.getHeightOfBoundingRectangularPart(part));
+	}
+
+	/**
+	 * Returns the upperLeftCorner as a Point of the smallest RectangularPart
+	 * that contains this and part.
+	 */
+	private Point getPointOfBoundingRectangularPart(RectangularArea part) {
+		return new Point((this.getLeftUpperCorner().getX() < part
+				.getLeftUpperCorner().getX()) ? this.getLeftUpperCorner()
+				.getX() : part.getLeftUpperCorner().getX(),
+				(this.getLeftUpperCorner().getY() < part.getLeftUpperCorner()
+						.getY()) ? this.getLeftUpperCorner().getY() : part
+						.getLeftUpperCorner().getY());
+	}
+
+	/**
+	 * Returns the width as an int of the smallest RectangularPart that contains
+	 * this and part.
+	 */
+	private int getWidthOfBoundingRectangularPart(RectangularArea part) {
+		if (this.getLeftUpperCorner().getX() < part.getLeftUpperCorner().getX())
+			return part.getLeftUpperCorner().getX() + part.getWidth()
+					- this.getLeftUpperCorner().getX();
+		else
+			return this.getLeftUpperCorner().getX() + this.getWidth()
+					- part.getLeftUpperCorner().getX();
+	}
+
+	/**
+	 * Returns the height as an int of the smallest RectangularPart that
+	 * contains this and part.
+	 */
+	private int getHeightOfBoundingRectangularPart(RectangularArea part) {
+		if (this.getLeftUpperCorner().getY() < part.getLeftUpperCorner().getY())
+			return part.getLeftUpperCorner().getY() + part.getHeight()
+					- this.getLeftUpperCorner().getY();
+		else
+			return this.getLeftUpperCorner().getY() + this.getHeight()
+					- part.getLeftUpperCorner().getY();
 	}
 
 	public boolean isSpaceWest(RectangularArea r) {

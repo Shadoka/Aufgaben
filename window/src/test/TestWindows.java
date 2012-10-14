@@ -15,6 +15,7 @@ public class TestWindows {
 	RectangularPart part4;
 	RectangularPart part5;
 	RectangularPart part6;
+	RectangularPart part7;
 
 	@Before
 	public void setUp() throws Exception {
@@ -24,16 +25,18 @@ public class TestWindows {
 		part4 = new RectangularPart(new Point(101, 101), 10, 10);
 		part5 = new RectangularPart(new Point(100, 100), 10, 10);
 		part6 = new RectangularPart(new Point(10, 30), 70, 10);
+		part7 = new RectangularPart(new Point(100, 0), 100, 100);
 	}
 
 	@Test
-	public void testIsParentOf() {
-		assertEquals(true, part1.isPartOf(part2));
-		assertEquals(true, part2.isPartOf(part1));
-		assertEquals(true, part3.isPartOf(part1));
-		assertEquals(true, part1.isPartOf(part3));
-		assertEquals(false, part4.isPartOf(part1));
-		assertEquals(true, part1.isPartOf(part5));
+	public void testOverlaps() {
+		assertEquals(true, part1.overlaps(part2));
+		assertEquals(true, part2.overlaps(part1));
+		assertEquals(true, part3.overlaps(part1));
+		assertEquals(true, part1.overlaps(part3));
+		assertEquals(false, part4.overlaps(part1));
+		assertEquals(false, part1.overlaps(part5));
+		assertEquals(false, part1.overlaps(part7));
 	}
 
 	@Test

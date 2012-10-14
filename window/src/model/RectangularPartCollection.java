@@ -38,7 +38,7 @@ public class RectangularPartCollection {
 			Iterator<RectangularPart> x = this.getParts().iterator();
 			while (x.hasNext()) {
 				RectangularPart innerCurrent = x.next();
-				if (current.isPartOf(innerCurrent)) {
+				if (current.overlaps(innerCurrent)) {
 					return true;
 				}
 			}

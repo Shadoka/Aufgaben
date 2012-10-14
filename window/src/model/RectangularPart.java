@@ -21,7 +21,7 @@ public class RectangularPart extends RectangularArea {
 		if (parent.isIn(this))
 			throw new HierarchyException();
 
-		if (this.isPartOf(parent)) {
+		if (this.overlaps(parent)) {
 			this.parent = parent;
 		} else {
 			try {

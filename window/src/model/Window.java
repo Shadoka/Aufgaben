@@ -90,7 +90,7 @@ public class Window extends RectangularArea {
 		Iterator<RectangularPart> i = before.getParts().iterator();
 		while (i.hasNext()) {
 			RectangularPart current = i.next();
-			if (current.isPartOf(meAsPart)) {
+			if (current.overlaps(meAsPart)) {
 				if (this.isSpaceEast(current)) {
 					result.add(this.calculateSpaceEast(current));
 				}
