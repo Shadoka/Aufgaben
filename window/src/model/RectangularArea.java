@@ -1,6 +1,8 @@
 package model;
 
-abstract public class RectangularArea {
+import observer.Observee;
+
+abstract public class RectangularArea extends Observee {
 
 	private Point leftUpperCorner;
 	private int width;
@@ -218,8 +220,13 @@ abstract public class RectangularArea {
 				&& (r.getLeftUpperCorner().getX() + r.getWidth()) >= (this
 						.getLeftUpperCorner().getX() + this.getWidth())) {
 			width = this.getWidth();
-		} else {
+		} else if (this.getLeftUpperCorner().getX() + this.getHeight() >= r
+				.getLeftUpperCorner().getX() + r.getWidth()) {
 			width = r.getWidth();
+		} else {
+			width = r.getWidth()
+					- (r.getLeftUpperCorner().getX() - this
+							.getLeftUpperCorner().getX());
 		}
 		return new RectangularPart(point, width, height);
 	}
@@ -247,8 +254,13 @@ abstract public class RectangularArea {
 				&& (r.getLeftUpperCorner().getX() + r.getWidth()) >= (this
 						.getLeftUpperCorner().getX() + this.getWidth())) {
 			width = this.getWidth();
-		} else {
+		} else if (this.getLeftUpperCorner().getX() + this.getHeight() >= r
+				.getLeftUpperCorner().getX() + r.getWidth()) {
 			width = r.getWidth();
+		} else {
+			width = r.getWidth()
+					- (r.getLeftUpperCorner().getX() - this
+							.getLeftUpperCorner().getX());
 		}
 		return new RectangularPart(point, width, height);
 	}

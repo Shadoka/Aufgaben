@@ -19,6 +19,7 @@ public class TestWindows {
 	RectangularPart part7;
 	RectangularPart part8;
 	RectangularPart part9;
+	RectangularPart part10;
 
 	Window win1;
 
@@ -33,6 +34,7 @@ public class TestWindows {
 		part7 = new RectangularPart(new Point(100, 0), 100, 100);
 		part8 = new RectangularPart(new Point(0, 0), 200, 100);
 		part9 = new RectangularPart(new Point(100, 100), 200, 100);
+		part10 = new RectangularPart(new Point(50, 50), 100, 100);
 
 		Window win1 = new Window();
 		win1.move(100, 100);
@@ -86,6 +88,8 @@ public class TestWindows {
 				.getY());
 		assertEquals(50, part3.calculateSpaceNorth(part6).getWidth());
 		assertEquals(10, part3.calculateSpaceNorth(part6).getHeight());
+
+		assertEquals(50, part1.calculateSpaceNorth(part10).getWidth());
 	}
 
 	@Test
