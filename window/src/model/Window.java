@@ -20,7 +20,7 @@ public class Window extends RectangularArea {
 	private boolean open;
 	Collection<Window> aboveMe;
 
-	Window() {
+	public Window() {
 		super(getInitialPosition(), InitialWidth, InitialHeight);
 		this.number = nextWindowNumber++;
 		this.setOpen(true);
@@ -55,9 +55,83 @@ public class Window extends RectangularArea {
 	}
 
 	public RectangularPartCollection getVisibleContext() {
-		// TODO (1) implement calculation of visible parts
-		System.out.println("ich werd aufgerufen");
 		RectangularPartCollection result = new RectangularPartCollection();
+		Vector<Window> aboveMe = this.aboveMeToVector();
+
+		if (aboveMe.isEmpty()) {
+			if (this.isOpen()) {
+				RectangularPart meAsPart = this.toPart();
+				try {
+					meAsPart.setParent(this);
+				} catch (HierarchyException e) {
+					throw new Error("Hierarchy shall be guaranteed!");
+				}
+				result.add(meAsPart);
+			}
+		} else {
+			int counter = 1;
+			Window windowBeforeMe = aboveMe.get(aboveMe.size() - counter);
+			counter++;
+			while (!windowBeforeMe.isOpen() && counter <= aboveMe.size()) {
+				aboveMe.get(aboveMe.size() - counter);
+			}
+			RectangularPartCollection beforeMe = windowBeforeMe
+					.getVisibleContext();
+			for (RectangularPart part : beforeMe.getParts()) {
+				try {
+					result.add(this.calculateVisibleContext(part));
+				} catch (HierarchyException e) {
+					throw new Error("Hierarchy shall be guaranteed!");
+				}
+			}
+		}
+
+		return result;
+	}
+
+	public RectangularPartCollection calculateVisibleContext(
+			RectangularPart part) throws HierarchyException {
+		RectangularPartCollection result = new RectangularPartCollection();
+
+		if (this.overlaps(part)) {
+			if (this.isSpaceWest(part)) {
+				RectangularPart westPart = this.calculateSpaceWest(part);
+				System.out.println("West");
+				westPart.setParent(this);
+				result.add(westPart);
+			}
+			if (this.isSpaceEast(part)) {
+				RectangularPart eastPart = this.calculateSpaceEast(part);
+				System.out.println("East");
+				eastPart.setParent(this);
+				result.add(eastPart);
+			}
+			if (this.isSpaceNorth(part)) {
+				RectangularPart northPart = this.calculateSpaceNorth(part);
+				System.out.println("North");
+				northPart.setParent(this);
+				result.add(northPart);
+			}
+			if (this.isSpaceSouth(part)) {
+				RectangularPart southPart = this.calculateSpaceSouth(part);
+				System.out.println("South");
+				southPart.setParent(this);
+				result.add(southPart);
+			}
+		} else {
+			RectangularPart meAsPart = this.toPart();
+			meAsPart.setParent(this);
+			result.add(meAsPart);
+		}
+
+		return result;
+	}
+
+	public Vector<Window> aboveMeToVector() {
+		return (Vector<Window>) this.getAboveMe();
+	}
+
+	public void dummy() {
 		if (this.isOpen()) {
 			if (this.getAboveMe().isEmpty()) {
 				RectangularPart meAsPart = new RectangularPart(
@@ -75,15 +149,18 @@ public class Window extends RectangularArea {
 					Window current = i.next();
 					RectangularPartCollection before = current
 							.getVisibleContext();
-					result.add(this.calculateVisibleParts(before));
+					try {
+						result.add(this.calculateVisibleParts(before));
+					} catch (HierarchyException e) {
+						throw new Error("Hierarchy shall be guaranteed!");
+					}
 				}
 			}
 		}
-		return result;
 	}
 
-	private RectangularPartCollection calculateVisibleParts(
-			RectangularPartCollection before) {
+	public RectangularPartCollection calculateVisibleParts(
+			RectangularPartCollection before) throws HierarchyException {
 		RectangularPartCollection result = new RectangularPartCollection();
 		RectangularPart meAsPart = this.toPart();
 
@@ -92,16 +169,26 @@ public class Window extends RectangularArea {
 			RectangularPart current = i.next();
 			if (current.overlaps(meAsPart)) {
 				if (this.isSpaceEast(current)) {
-					result.add(this.calculateSpaceEast(current));
+					RectangularPart eastPart = this.calculateSpaceEast(current);
+					eastPart.setParent(this);
+					result.add(eastPart);
 				}
 				if (this.isSpaceWest(current)) {
-					result.add(this.calculateSpaceWest(current));
+					RectangularPart westPart = this.calculateSpaceWest(current);
+					westPart.setParent(this);
+					result.add(westPart);
 				}
 				if (this.isSpaceNorth(current)) {
-					result.add(this.calculateSpaceNorth(current));
+					RectangularPart northPart = this
+							.calculateSpaceNorth(current);
+					northPart.setParent(this);
+					result.add(northPart);
 				}
 				if (this.isSpaceSouth(current)) {
-					result.add(this.calculateSpaceSouth(current));
+					RectangularPart southPart = this
+							.calculateSpaceSouth(current);
+					southPart.setParent(this);
+					result.add(southPart);
 				}
 			} else {
 				result.add(current);

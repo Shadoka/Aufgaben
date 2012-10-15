@@ -20,28 +20,24 @@ public class RectangularPartCollection {
 		this.parts = parts;
 	}
 
-	public void add(RectangularPartCollection partCollection) {
-		// TODO (1) it shall be checked that two parts in the same collection do
-		// not overlap
-		if (!this.isPartOverlapping(partCollection)) {
-			this.getParts().addAll(partCollection.parts);
-		} else {
-			throw new Error("Two overlapping parts in the same Collection");
+	public void add(final RectangularPartCollection parts) {
+		final Iterator<RectangularPart> i = parts.getParts().iterator();
+		while (i.hasNext()) {
+			final RectangularPart current = i.next();
+			if (!this.overlaps(current))
+				this.add(current);
+			else
+				System.out.println("Aussortiert!");
 		}
 	}
 
-	private boolean isPartOverlapping(RectangularPartCollection partCollection) {
-
-		Iterator<RectangularPart> i = partCollection.getParts().iterator();
+	private boolean overlaps(final RectangularPart part) {
+		final Iterator<RectangularPart> i = this.getParts().iterator();
 		while (i.hasNext()) {
-			RectangularPart current = i.next();
-			Iterator<RectangularPart> x = this.getParts().iterator();
-			while (x.hasNext()) {
-				RectangularPart innerCurrent = x.next();
-				if (current.overlaps(innerCurrent)) {
-					return true;
-				}
-			}
+			final RectangularPart current = i.next();
+
+			if (current.overlaps(part))
+				return true;
 		}
 		return false;
 	}

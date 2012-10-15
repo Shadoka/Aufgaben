@@ -3,6 +3,7 @@ package test;
 import static org.junit.Assert.assertEquals;
 import model.Point;
 import model.RectangularPart;
+import model.Window;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +17,10 @@ public class TestWindows {
 	RectangularPart part5;
 	RectangularPart part6;
 	RectangularPart part7;
+	RectangularPart part8;
+	RectangularPart part9;
+
+	Window win1;
 
 	@Before
 	public void setUp() throws Exception {
@@ -26,6 +31,11 @@ public class TestWindows {
 		part5 = new RectangularPart(new Point(100, 100), 10, 10);
 		part6 = new RectangularPart(new Point(10, 30), 70, 10);
 		part7 = new RectangularPart(new Point(100, 0), 100, 100);
+		part8 = new RectangularPart(new Point(0, 0), 200, 100);
+		part9 = new RectangularPart(new Point(100, 100), 200, 100);
+
+		Window win1 = new Window();
+		win1.move(100, 100);
 	}
 
 	@Test
@@ -37,6 +47,8 @@ public class TestWindows {
 		assertEquals(false, part4.overlaps(part1));
 		assertEquals(false, part1.overlaps(part5));
 		assertEquals(false, part1.overlaps(part7));
+		assertEquals(false, part9.overlaps(part8));
+		assertEquals(false, part8.overlaps(part9));
 	}
 
 	@Test
@@ -84,6 +96,24 @@ public class TestWindows {
 				.getY());
 		assertEquals(50, part3.calculateSpaceSouth(part6).getWidth());
 		assertEquals(30, part3.calculateSpaceSouth(part6).getHeight());
+	}
+
+	@Test
+	public void testIsSpaceEast() {
+		assertEquals(true, part1.isSpaceEast(part3));
+		assertEquals(false, part1.isSpaceEast(part1));
+	}
+
+	@Test
+	public void testIsSpaceWest() {
+		assertEquals(true, part1.isSpaceWest(part3));
+		assertEquals(false, part1.isSpaceWest(part1));
+	}
+
+	@Test
+	public void testIsSpaceNorth() {
+		assertEquals(true, part1.isSpaceNorth(part3));
+		assertEquals(false, part1.isSpaceNorth(part7));
 	}
 
 }
