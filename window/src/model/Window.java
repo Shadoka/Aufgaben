@@ -131,34 +131,6 @@ public class Window extends RectangularArea {
 		return (Vector<Window>) this.getAboveMe();
 	}
 
-	public void dummy() {
-		if (this.isOpen()) {
-			if (this.getAboveMe().isEmpty()) {
-				RectangularPart meAsPart = new RectangularPart(
-						this.getLeftUpperCorner(), this.getWidth(),
-						this.getHeight());
-				try {
-					meAsPart.setParent(this);
-				} catch (HierarchyException e) {
-					throw new Error("Hierarchy shall be guaranteed!");
-				}
-				result.add(meAsPart);
-			} else {
-				Iterator<Window> i = this.getAboveMe().iterator();
-				while (i.hasNext()) {
-					Window current = i.next();
-					RectangularPartCollection before = current
-							.getVisibleContext();
-					try {
-						result.add(this.calculateVisibleParts(before));
-					} catch (HierarchyException e) {
-						throw new Error("Hierarchy shall be guaranteed!");
-					}
-				}
-			}
-		}
-	}
-
 	public RectangularPartCollection calculateVisibleParts(
 			RectangularPartCollection before) throws HierarchyException {
 		RectangularPartCollection result = new RectangularPartCollection();
