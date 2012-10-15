@@ -23,18 +23,13 @@ public class Point {
 		return p1.getY() < p2.getY();
 	}
 
+	/**
+	 * Returns a Point which has the same x- and y-values as <this>.
+	 * 
+	 * @return : Point
+	 */
 	public Point copyPoint() {
 		return new Point(this.getX(), this.getY());
-	}
-
-	/**
-	 * Returns true if the Point <this> has a greater or equal x- and y-value.
-	 * 
-	 * @param p
-	 * @return
-	 */
-	public static boolean weiterDraußen(Point p1, Point p2) {
-		return !linksVon(p1, p2) & !unter(p1, p2);
 	}
 
 	public int getX() {

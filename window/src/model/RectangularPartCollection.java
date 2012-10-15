@@ -26,11 +26,17 @@ public class RectangularPartCollection {
 			final RectangularPart current = i.next();
 			if (!this.overlaps(current))
 				this.add(current);
-			else
-				System.out.println("Aussortiert!");
 		}
 	}
 
+	/**
+	 * Returns true if atleast one RectangularPart of the collection overlaps
+	 * with the given RectangularPart <part>.
+	 * 
+	 * @param part
+	 *            : RectangularPart
+	 * @return : boolean
+	 */
 	private boolean overlaps(final RectangularPart part) {
 		final Iterator<RectangularPart> i = this.getParts().iterator();
 		while (i.hasNext()) {

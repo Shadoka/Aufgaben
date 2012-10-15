@@ -1,7 +1,6 @@
 package model;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Vector;
 
 public class Window extends RectangularArea {
@@ -49,11 +48,24 @@ public class Window extends RectangularArea {
 		System.out.println("Resize: " + this);
 	}
 
+	/**
+	 * Returns a RectangularPart which has the same attribute values like
+	 * <this>. This is possible because of the superclass RectangularArea, which
+	 * are both extending.
+	 * 
+	 * @return : RectangularPart
+	 */
 	public RectangularPart toPart() {
 		return new RectangularPart(this.getLeftUpperCorner(), this.getWidth(),
 				this.getHeight());
 	}
 
+	/**
+	 * Returns a collection of all RectangularParts of this Window, which are
+	 * visible.
+	 * 
+	 * @return : RectangularPartCollection
+	 */
 	public RectangularPartCollection getVisibleContext() {
 		RectangularPartCollection result = new RectangularPartCollection();
 		Vector<Window> aboveMe = this.aboveMeToVector();
@@ -89,6 +101,16 @@ public class Window extends RectangularArea {
 		return result;
 	}
 
+	/**
+	 * This method calculates all visible parts of this Window with the specific
+	 * RectangularPart <part>. If the whole given Part is visible, it will be
+	 * simply returned.
+	 * 
+	 * @param part
+	 *            : RectangularPart
+	 * @return : RectangularPartCollection
+	 * @throws HierarchyException
+	 */
 	public RectangularPartCollection calculateVisibleContext(
 			RectangularPart part) throws HierarchyException {
 		RectangularPartCollection result = new RectangularPartCollection();
@@ -127,47 +149,13 @@ public class Window extends RectangularArea {
 		return result;
 	}
 
+	/**
+	 * Returns the collection of windows above this window as a Vector.
+	 * 
+	 * @return : Vector
+	 */
 	public Vector<Window> aboveMeToVector() {
 		return (Vector<Window>) this.getAboveMe();
-	}
-
-	public RectangularPartCollection calculateVisibleParts(
-			RectangularPartCollection before) throws HierarchyException {
-		RectangularPartCollection result = new RectangularPartCollection();
-		RectangularPart meAsPart = this.toPart();
-
-		Iterator<RectangularPart> i = before.getParts().iterator();
-		while (i.hasNext()) {
-			RectangularPart current = i.next();
-			if (current.overlaps(meAsPart)) {
-				if (this.isSpaceEast(current)) {
-					RectangularPart eastPart = this.calculateSpaceEast(current);
-					eastPart.setParent(this);
-					result.add(eastPart);
-				}
-				if (this.isSpaceWest(current)) {
-					RectangularPart westPart = this.calculateSpaceWest(current);
-					westPart.setParent(this);
-					result.add(westPart);
-				}
-				if (this.isSpaceNorth(current)) {
-					RectangularPart northPart = this
-							.calculateSpaceNorth(current);
-					northPart.setParent(this);
-					result.add(northPart);
-				}
-				if (this.isSpaceSouth(current)) {
-					RectangularPart southPart = this
-							.calculateSpaceSouth(current);
-					southPart.setParent(this);
-					result.add(southPart);
-				}
-			} else {
-				result.add(current);
-			}
-		}
-
-		return result;
 	}
 
 	public String toString() {

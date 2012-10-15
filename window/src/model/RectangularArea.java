@@ -112,19 +112,51 @@ abstract public class RectangularArea {
 					- part.getLeftUpperCorner().getY();
 	}
 
+	/**
+	 * Returns true, if there is visible space between the left border of <this>
+	 * and the left border of <r>.
+	 * 
+	 * @param r
+	 *            : RectangularArea
+	 * @return : boolean
+	 */
 	public boolean isSpaceWest(RectangularArea r) {
 		return this.leftUpperCorner.getX() < r.leftUpperCorner.getX();
 	}
 
+	/**
+	 * Returns true, if there is visible space between the right border of
+	 * <this> and <r>.
+	 * 
+	 * @param r
+	 *            : RectangularArea
+	 * @return : boolean
+	 */
 	public boolean isSpaceEast(RectangularArea r) {
 		return (this.leftUpperCorner.getX() + this.width) > (r.leftUpperCorner
 				.getX() + r.width);
 	}
 
+	/**
+	 * Returns true, if there is visible space between the upper border of
+	 * <this> and the upper border of <r>.
+	 * 
+	 * @param r
+	 *            : RectangularArea
+	 * @return : boolean
+	 */
 	public boolean isSpaceNorth(RectangularArea r) {
 		return this.leftUpperCorner.getY() < r.leftUpperCorner.getY();
 	}
 
+	/**
+	 * Returns true, if there is visible space between the lower border of
+	 * <this> and the lower border of <r>.
+	 * 
+	 * @param r
+	 *            : RectangularArea
+	 * @return : boolean
+	 */
 	public boolean isSpaceSouth(RectangularArea r) {
 		return (this.leftUpperCorner.getY() + this.height) > (r.leftUpperCorner
 				.getX() + r.height);
