@@ -139,7 +139,7 @@ abstract public class RectangularArea {
 	 * @return
 	 */
 	public RectangularPart calculateSpaceWest(RectangularArea r) {
-		Point point = this.getLeftUpperCorner();
+		Point point = this.getLeftUpperCorner().copyPoint();
 		int height = this.height;
 		int width = r.getLeftUpperCorner().getX()
 				- this.getLeftUpperCorner().getX();
@@ -172,7 +172,7 @@ abstract public class RectangularArea {
 	 * @return
 	 */
 	public RectangularPart calculateSpaceNorth(RectangularArea r) {
-		Point point = this.getLeftUpperCorner();
+		Point point = this.getLeftUpperCorner().copyPoint();
 		if (point.getX() < r.getLeftUpperCorner().getX()) {
 			point.setX(r.getLeftUpperCorner().getX());
 		}

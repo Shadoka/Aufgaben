@@ -23,6 +23,10 @@ public class Point {
 		return p1.getY() < p2.getY();
 	}
 
+	public Point copyPoint() {
+		return new Point(this.getX(), this.getY());
+	}
+
 	/**
 	 * Returns true if the Point <this> has a greater or equal x- and y-value.
 	 * 
