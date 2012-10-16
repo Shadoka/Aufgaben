@@ -1,6 +1,7 @@
 package model;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Vector;
 
 import observer.Observer;
@@ -91,8 +92,8 @@ public class Window extends RectangularArea implements Observer {
 	 * @return : RectangularPart
 	 */
 	public RectangularPart toPart() {
-		return new RectangularPart(this.getLeftUpperCorner(), this.getWidth(),
-				this.getHeight());
+		return new RectangularPart(this.getLeftUpperCorner().copyPoint(),
+				this.getWidth(), this.getHeight());
 	}
 
 	/**
@@ -134,7 +135,10 @@ public class Window extends RectangularArea implements Observer {
 					}
 					result.add(meAsPart);
 				} else {
-					for (RectangularPart part : beforeMe.getParts()) {
+					Iterator<RectangularPart> i = beforeMe.getParts()
+							.iterator();
+					while (i.hasNext()) {
+						RectangularPart part = i.next();
 						try {
 							result.add(this.calculateVisibleContext(part));
 						} catch (HierarchyException e) {
@@ -145,7 +149,30 @@ public class Window extends RectangularArea implements Observer {
 			}
 		}
 
+		this.addMeIfNotIn(result);
+
 		return result;
+	}
+
+	private void addMeIfNotIn(RectangularPartCollection parts) {
+		Iterator<RectangularPart> i = parts.getParts().iterator();
+		while (i.hasNext()) {
+			RectangularPart current = i.next();
+			if (this.equals(current.parent)) {
+				System.out.println("Hier bin ich nicht");
+				break;
+			} else if (!i.hasNext()) {
+				System.out.println("Hier bin ich");
+				RectangularPart meAsPart = this.toPart();
+				try {
+					meAsPart.setParent(this);
+				} catch (HierarchyException e) {
+					throw new Error("Hierarchy shall be guaranteed!");
+				}
+				parts.add(meAsPart);
+				break;
+			}
+		}
 	}
 
 	/**
@@ -198,9 +225,10 @@ public class Window extends RectangularArea implements Observer {
 				result.add(southPart);
 			}
 		} else {
-			RectangularPart meAsPart = this.toPart();
-			meAsPart.setParent(this);
-			result.add(meAsPart);
+			// RectangularPart meAsPart = this.toPart();
+			// meAsPart.setParent(this);
+			// result.add(meAsPart);
+			result.add(part);
 		}
 
 		return result;
@@ -269,6 +297,7 @@ public class Window extends RectangularArea implements Observer {
 	@Override
 	public void update(Event e) {
 		this.getState().handleNotification(e);
+		System.out.println("Update");
 	}
 
 	public void dispose() {

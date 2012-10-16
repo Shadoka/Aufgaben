@@ -114,6 +114,13 @@ abstract public class RectangularArea extends Observee {
 					- part.getLeftUpperCorner().getY();
 	}
 
+	private boolean overlapsHorizontal(RectangularArea r) {
+		return r.getLeftUpperCorner().getX() < this.getLeftUpperCorner().getX()
+				+ this.getWidth()
+				&& this.getLeftUpperCorner().getX() < r.getLeftUpperCorner()
+						.getX() + r.getWidth();
+	}
+
 	/**
 	 * Returns true, if there is visible space between the left border of <this>
 	 * and the left border of <r>.
@@ -148,7 +155,11 @@ abstract public class RectangularArea extends Observee {
 	 * @return : boolean
 	 */
 	public boolean isSpaceNorth(RectangularArea r) {
-		return this.leftUpperCorner.getY() < r.leftUpperCorner.getY();
+		return this.leftUpperCorner.getY() < r.leftUpperCorner.getY()
+				&& (r.getLeftUpperCorner().getX() < this.getLeftUpperCorner()
+						.getX() + this.getWidth() && r.getLeftUpperCorner()
+						.getX() + r.getWidth() > this.getLeftUpperCorner()
+						.getX());
 	}
 
 	/**
@@ -161,7 +172,11 @@ abstract public class RectangularArea extends Observee {
 	 */
 	public boolean isSpaceSouth(RectangularArea r) {
 		return (this.leftUpperCorner.getY() + this.height) > (r.leftUpperCorner
-				.getX() + r.height);
+				.getY() + r.height)
+				&& (r.getLeftUpperCorner().getX() < this.getLeftUpperCorner()
+						.getX() + this.getWidth() && r.getLeftUpperCorner()
+						.getX() + r.getWidth() > this.getLeftUpperCorner()
+						.getX());
 	}
 
 	/**

@@ -26,6 +26,8 @@ public class RectangularPartCollection {
 			final RectangularPart current = i.next();
 			if (!this.overlaps(current))
 				this.add(current);
+			else
+				System.out.println("Doppelt");
 		}
 	}
 
