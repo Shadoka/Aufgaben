@@ -266,8 +266,13 @@ public class Window extends RectangularArea implements Observer {
 		}
 	}
 
+	@Override
+	public void update(Event e) {
+		this.getState().handleNotification(e);
+	}
+
 	public void dispose() {
-		// TODO (2) implement dispose: possibly send event to all windows below
+		this.deregisterAtAllAbove();
 		System.out.println("Dispose: " + this);
 
 	}
@@ -283,10 +288,5 @@ public class Window extends RectangularArea implements Observer {
 
 	public void setState(State state) {
 		this.state = state;
-	}
-
-	@Override
-	public void update(Event e) {
-		this.getState().handleNotification(e);
 	}
 }

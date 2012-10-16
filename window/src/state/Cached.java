@@ -6,6 +6,13 @@ import event.CalculationNeededEvent;
 import event.Event;
 import event.EventVisitor;
 
+/**
+ * Class represents a state a Window can be in. In this state are the visible
+ * Parts of the given Window already saved.
+ * 
+ * @author Tilmann
+ * 
+ */
 public class Cached extends AbstractState {
 
 	private RectangularPartCollection parts;
@@ -15,6 +22,15 @@ public class Cached extends AbstractState {
 		this.parts = parts;
 	}
 
+	/**
+	 * Factory-Method for Cached states.
+	 * 
+	 * @param master
+	 *            : Window
+	 * @param parts
+	 *            : RectangularPartCollection
+	 * @return : Cached
+	 */
 	public static Cached create(Window master, RectangularPartCollection parts) {
 		return new Cached(master, parts);
 	}
