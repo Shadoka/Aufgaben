@@ -1,6 +1,8 @@
 package model;
 
-abstract public class RectangularArea {
+import observer.Observee;
+
+abstract public class RectangularArea extends Observee {
 
 	private Point leftUpperCorner;
 	private int width;
@@ -112,22 +114,69 @@ abstract public class RectangularArea {
 					- part.getLeftUpperCorner().getY();
 	}
 
+	private boolean overlapsHorizontal(RectangularArea r) {
+		return r.getLeftUpperCorner().getX() < this.getLeftUpperCorner().getX()
+				+ this.getWidth()
+				&& this.getLeftUpperCorner().getX() < r.getLeftUpperCorner()
+						.getX() + r.getWidth();
+	}
+
+	/**
+	 * Returns true, if there is visible space between the left border of <this>
+	 * and the left border of <r>.
+	 * 
+	 * @param r
+	 *            : RectangularArea
+	 * @return : boolean
+	 */
 	public boolean isSpaceWest(RectangularArea r) {
 		return this.leftUpperCorner.getX() < r.leftUpperCorner.getX();
 	}
 
+	/**
+	 * Returns true, if there is visible space between the right border of
+	 * <this> and <r>.
+	 * 
+	 * @param r
+	 *            : RectangularArea
+	 * @return : boolean
+	 */
 	public boolean isSpaceEast(RectangularArea r) {
 		return (this.leftUpperCorner.getX() + this.width) > (r.leftUpperCorner
 				.getX() + r.width);
 	}
 
+	/**
+	 * Returns true, if there is visible space between the upper border of
+	 * <this> and the upper border of <r>.
+	 * 
+	 * @param r
+	 *            : RectangularArea
+	 * @return : boolean
+	 */
 	public boolean isSpaceNorth(RectangularArea r) {
-		return this.leftUpperCorner.getY() < r.leftUpperCorner.getY();
+		return this.leftUpperCorner.getY() < r.leftUpperCorner.getY()
+				&& (r.getLeftUpperCorner().getX() < this.getLeftUpperCorner()
+						.getX() + this.getWidth() && r.getLeftUpperCorner()
+						.getX() + r.getWidth() > this.getLeftUpperCorner()
+						.getX());
 	}
 
+	/**
+	 * Returns true, if there is visible space between the lower border of
+	 * <this> and the lower border of <r>.
+	 * 
+	 * @param r
+	 *            : RectangularArea
+	 * @return : boolean
+	 */
 	public boolean isSpaceSouth(RectangularArea r) {
 		return (this.leftUpperCorner.getY() + this.height) > (r.leftUpperCorner
-				.getX() + r.height);
+				.getY() + r.height)
+				&& (r.getLeftUpperCorner().getX() < this.getLeftUpperCorner()
+						.getX() + this.getWidth() && r.getLeftUpperCorner()
+						.getX() + r.getWidth() > this.getLeftUpperCorner()
+						.getX());
 	}
 
 	/**
@@ -139,7 +188,7 @@ abstract public class RectangularArea {
 	 * @return
 	 */
 	public RectangularPart calculateSpaceWest(RectangularArea r) {
-		Point point = this.getLeftUpperCorner();
+		Point point = this.getLeftUpperCorner().copyPoint();
 		int height = this.height;
 		int width = r.getLeftUpperCorner().getX()
 				- this.getLeftUpperCorner().getX();
@@ -172,7 +221,7 @@ abstract public class RectangularArea {
 	 * @return
 	 */
 	public RectangularPart calculateSpaceNorth(RectangularArea r) {
-		Point point = this.getLeftUpperCorner();
+		Point point = this.getLeftUpperCorner().copyPoint();
 		if (point.getX() < r.getLeftUpperCorner().getX()) {
 			point.setX(r.getLeftUpperCorner().getX());
 		}
@@ -186,8 +235,13 @@ abstract public class RectangularArea {
 				&& (r.getLeftUpperCorner().getX() + r.getWidth()) >= (this
 						.getLeftUpperCorner().getX() + this.getWidth())) {
 			width = this.getWidth();
-		} else {
+		} else if (this.getLeftUpperCorner().getX() + this.getHeight() >= r
+				.getLeftUpperCorner().getX() + r.getWidth()) {
 			width = r.getWidth();
+		} else {
+			width = r.getWidth()
+					- (r.getLeftUpperCorner().getX() - this
+							.getLeftUpperCorner().getX());
 		}
 		return new RectangularPart(point, width, height);
 	}
@@ -215,8 +269,13 @@ abstract public class RectangularArea {
 				&& (r.getLeftUpperCorner().getX() + r.getWidth()) >= (this
 						.getLeftUpperCorner().getX() + this.getWidth())) {
 			width = this.getWidth();
-		} else {
+		} else if (this.getLeftUpperCorner().getX() + this.getHeight() >= r
+				.getLeftUpperCorner().getX() + r.getWidth()) {
 			width = r.getWidth();
+		} else {
+			width = r.getWidth()
+					- (r.getLeftUpperCorner().getX() - this
+							.getLeftUpperCorner().getX());
 		}
 		return new RectangularPart(point, width, height);
 	}

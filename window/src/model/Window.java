@@ -4,13 +4,23 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
-public class Window extends RectangularArea {
+import observer.Observer;
+import state.Cached;
+import state.NotCached;
+import state.State;
+import state.StateVisitor;
+import event.CalculationNeededEvent;
+import event.Event;
+
+public class Window extends RectangularArea implements Observer {
 
 	private static int nextWindowNumber = 0;
 
 	private static final int InitialWidth = 200;
 	private static final int InitialHeight = 100;
 	private static final int Origin = 0;
+
+	private State state;
 
 	private static final Point getInitialPosition() {
 		return new Point(Origin, Origin);
@@ -23,8 +33,9 @@ public class Window extends RectangularArea {
 	public Window() {
 		super(getInitialPosition(), InitialWidth, InitialHeight);
 		this.number = nextWindowNumber++;
-		this.setOpen(true);
+		this.open = true;
 		this.setAboveMe(new Vector<Window>());
+		this.state = NotCached.create(this);
 	}
 
 	private boolean isOpen() {
@@ -33,28 +44,65 @@ public class Window extends RectangularArea {
 
 	public void setOpen(boolean open) {
 		this.open = open;
-		// TODO (2) possibly send event to all windows below
+		this.update(CalculationNeededEvent.create());
+		this.notifyObservers(CalculationNeededEvent.create());
 		System.out.println("SetOpen(" + open + "): " + this);
 	}
 
 	public void move(int deltaX, int deltaY) {
 		super.move(deltaX, deltaY);
-		// TODO (2) possibly send event to all windows below
+		this.update(CalculationNeededEvent.create());
+		this.notifyObservers(CalculationNeededEvent.create());
 		System.out.println("Move: " + this);
 	}
 
 	public void resize(int width, int height) throws NegativeLengthException {
 		super.resize(width, height);
-		// TODO (2) possibly send event to all windows below
+		this.update(CalculationNeededEvent.create());
+		this.notifyObservers(CalculationNeededEvent.create());
 		System.out.println("Resize: " + this);
 	}
 
-	public RectangularPart toPart() {
-		return new RectangularPart(this.getLeftUpperCorner(), this.getWidth(),
-				this.getHeight());
+	public RectangularPartCollection handleState(State state) {
+		return state.accept(new StateVisitor() {
+
+			@Override
+			public RectangularPartCollection visit(Cached state) {
+				System.out.println("Hab die Teile schon");
+				return state.getParts();
+			}
+
+			@Override
+			public RectangularPartCollection visit(NotCached state) {
+				RectangularPartCollection parts = Window.this
+						.getVisibleContextIntern();
+				Window.this.setState(Cached.create(Window.this, parts));
+				System.out.println("Neu berechnet!");
+				return parts;
+			}
+
+		});
 	}
 
-	public RectangularPartCollection getVisibleContext() {
+	/**
+	 * Returns a RectangularPart which has the same attribute values like
+	 * <this>. This is possible because of the superclass RectangularArea, which
+	 * are both extending.
+	 * 
+	 * @return : RectangularPart
+	 */
+	public RectangularPart toPart() {
+		return new RectangularPart(this.getLeftUpperCorner().copyPoint(),
+				this.getWidth(), this.getHeight());
+	}
+
+	/**
+	 * Returns a collection of all RectangularParts of this Window, which are
+	 * visible.
+	 * 
+	 * @return : RectangularPartCollection
+	 */
+	private RectangularPartCollection getVisibleContextIntern() {
 		RectangularPartCollection result = new RectangularPartCollection();
 		Vector<Window> aboveMe = this.aboveMeToVector();
 
@@ -69,26 +117,84 @@ public class Window extends RectangularArea {
 				result.add(meAsPart);
 			}
 		} else {
-			int counter = 1;
-			Window windowBeforeMe = aboveMe.get(aboveMe.size() - counter);
-			counter++;
-			while (!windowBeforeMe.isOpen() && counter <= aboveMe.size()) {
-				aboveMe.get(aboveMe.size() - counter);
-			}
-			RectangularPartCollection beforeMe = windowBeforeMe
-					.getVisibleContext();
-			for (RectangularPart part : beforeMe.getParts()) {
-				try {
-					result.add(this.calculateVisibleContext(part));
-				} catch (HierarchyException e) {
-					throw new Error("Hierarchy shall be guaranteed!");
+			if (this.isOpen()) {
+				int counter = 1;
+				Window windowBeforeMe = aboveMe.get(aboveMe.size() - counter);
+				counter++;
+				while (!windowBeforeMe.isOpen() && counter <= aboveMe.size()) {
+					aboveMe.get(aboveMe.size() - counter);
+				}
+				RectangularPartCollection beforeMe = windowBeforeMe
+						.getVisibleContext();
+				if (beforeMe.getParts().isEmpty()) {
+					RectangularPart meAsPart = this.toPart();
+					try {
+						meAsPart.setParent(this);
+					} catch (HierarchyException e) {
+						throw new Error("Hierarchy shall be guaranteed!");
+					}
+					result.add(meAsPart);
+				} else {
+					Iterator<RectangularPart> i = beforeMe.getParts()
+							.iterator();
+					while (i.hasNext()) {
+						RectangularPart part = i.next();
+						try {
+							result.add(this.calculateVisibleContext(part));
+						} catch (HierarchyException e) {
+							throw new Error("Hierarchy shall be guaranteed!");
+						}
+					}
 				}
 			}
 		}
 
+		this.addMeIfNotIn(result);
+
 		return result;
 	}
 
+	private void addMeIfNotIn(RectangularPartCollection parts) {
+		Iterator<RectangularPart> i = parts.getParts().iterator();
+		while (i.hasNext()) {
+			RectangularPart current = i.next();
+			if (this.equals(current.parent)) {
+				System.out.println("Hier bin ich nicht");
+				break;
+			} else if (!i.hasNext()) {
+				System.out.println("Hier bin ich");
+				RectangularPart meAsPart = this.toPart();
+				try {
+					meAsPart.setParent(this);
+				} catch (HierarchyException e) {
+					throw new Error("Hierarchy shall be guaranteed!");
+				}
+				parts.add(meAsPart);
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Extern access on the visible parts of this window. Whether the parts have
+	 * to be calculated or not will be decided by the state.
+	 * 
+	 * @return : RectangularPartCollection
+	 */
+	public RectangularPartCollection getVisibleContext() {
+		return this.handleState(this.getState());
+	}
+
+	/**
+	 * This method calculates all visible parts of this Window with the specific
+	 * RectangularPart <part>. If the whole given Part is visible, it will be
+	 * simply returned.
+	 * 
+	 * @param part
+	 *            : RectangularPart
+	 * @return : RectangularPartCollection
+	 * @throws HierarchyException
+	 */
 	public RectangularPartCollection calculateVisibleContext(
 			RectangularPart part) throws HierarchyException {
 		RectangularPartCollection result = new RectangularPartCollection();
@@ -119,83 +225,22 @@ public class Window extends RectangularArea {
 				result.add(southPart);
 			}
 		} else {
-			RectangularPart meAsPart = this.toPart();
-			meAsPart.setParent(this);
-			result.add(meAsPart);
+			// RectangularPart meAsPart = this.toPart();
+			// meAsPart.setParent(this);
+			// result.add(meAsPart);
+			result.add(part);
 		}
 
 		return result;
 	}
 
+	/**
+	 * Returns the collection of windows above this window as a Vector.
+	 * 
+	 * @return : Vector
+	 */
 	public Vector<Window> aboveMeToVector() {
 		return (Vector<Window>) this.getAboveMe();
-	}
-
-	public void dummy() {
-		if (this.isOpen()) {
-			if (this.getAboveMe().isEmpty()) {
-				RectangularPart meAsPart = new RectangularPart(
-						this.getLeftUpperCorner(), this.getWidth(),
-						this.getHeight());
-				try {
-					meAsPart.setParent(this);
-				} catch (HierarchyException e) {
-					throw new Error("Hierarchy shall be guaranteed!");
-				}
-				result.add(meAsPart);
-			} else {
-				Iterator<Window> i = this.getAboveMe().iterator();
-				while (i.hasNext()) {
-					Window current = i.next();
-					RectangularPartCollection before = current
-							.getVisibleContext();
-					try {
-						result.add(this.calculateVisibleParts(before));
-					} catch (HierarchyException e) {
-						throw new Error("Hierarchy shall be guaranteed!");
-					}
-				}
-			}
-		}
-	}
-
-	public RectangularPartCollection calculateVisibleParts(
-			RectangularPartCollection before) throws HierarchyException {
-		RectangularPartCollection result = new RectangularPartCollection();
-		RectangularPart meAsPart = this.toPart();
-
-		Iterator<RectangularPart> i = before.getParts().iterator();
-		while (i.hasNext()) {
-			RectangularPart current = i.next();
-			if (current.overlaps(meAsPart)) {
-				if (this.isSpaceEast(current)) {
-					RectangularPart eastPart = this.calculateSpaceEast(current);
-					eastPart.setParent(this);
-					result.add(eastPart);
-				}
-				if (this.isSpaceWest(current)) {
-					RectangularPart westPart = this.calculateSpaceWest(current);
-					westPart.setParent(this);
-					result.add(westPart);
-				}
-				if (this.isSpaceNorth(current)) {
-					RectangularPart northPart = this
-							.calculateSpaceNorth(current);
-					northPart.setParent(this);
-					result.add(northPart);
-				}
-				if (this.isSpaceSouth(current)) {
-					RectangularPart southPart = this
-							.calculateSpaceSouth(current);
-					southPart.setParent(this);
-					result.add(southPart);
-				}
-			} else {
-				result.add(current);
-			}
-		}
-
-		return result;
 	}
 
 	public String toString() {
@@ -220,22 +265,57 @@ public class Window extends RectangularArea {
 		this.aboveMe = aboveMe;
 	}
 
-	public void setAsTop(Window window) {
-		if (this.equals(window)) {
-			this.getAboveMe().clear();
-		} else {
-			if (!this.getAboveMe().contains(window))
-				this.getAboveMe().add(window);
+	private void deregisterAtAllAbove() {
+		for (Window current : this.getAboveMe()) {
+			current.deregister(this);
 		}
 	}
 
+	private void registerAllAboveMe() {
+		for (Window current : this.getAboveMe()) {
+			this.register(current);
+		}
+	}
+
+	public void setAsTop(Window window) {
+		if (this.equals(window)) {
+			this.deregisterAtAllAbove();
+			this.registerAllAboveMe();
+			this.getAboveMe().clear();
+			this.update(CalculationNeededEvent.create());
+			this.notifyObservers(CalculationNeededEvent.create());
+		} else {
+			if (!this.getAboveMe().contains(window)) {
+				window.register(this);
+				this.getAboveMe().add(window);
+				this.update(CalculationNeededEvent.create());
+				this.notifyObservers(CalculationNeededEvent.create());
+			}
+		}
+	}
+
+	@Override
+	public void update(Event e) {
+		this.getState().handleNotification(e);
+		System.out.println("Update");
+	}
+
 	public void dispose() {
-		// TODO (2) implement dispose: possibly send event to all windows below
+		this.deregisterAtAllAbove();
 		System.out.println("Dispose: " + this);
 
 	}
 
 	public void newTop(Window window) {
 		this.getAboveMe().add(window);
+		window.register(this);
+	}
+
+	public State getState() {
+		return state;
+	}
+
+	public void setState(State state) {
+		this.state = state;
 	}
 }

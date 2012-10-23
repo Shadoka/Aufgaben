@@ -24,13 +24,12 @@ public class Point {
 	}
 
 	/**
-	 * Returns true if the Point <this> has a greater or equal x- and y-value.
+	 * Returns a Point which has the same x- and y-values as <this>.
 	 * 
-	 * @param p
-	 * @return
+	 * @return : Point
 	 */
-	public static boolean weiterDrauﬂen(Point p1, Point p2) {
-		return !linksVon(p1, p2) & !unter(p1, p2);
+	public Point copyPoint() {
+		return new Point(this.getX(), this.getY());
 	}
 
 	public int getX() {
