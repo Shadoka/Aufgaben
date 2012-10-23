@@ -4,6 +4,8 @@ package observer;
 import java.util.Iterator;
 import java.util.Vector;
 
+import model.Expression;
+
 public class Observee {
 	 
 	private Vector<Observer> observers;
@@ -28,11 +30,11 @@ public class Observee {
 	}
 	/**Sends update notifications to all registered observers
 	 */
-	protected void notifyObservers(int value){
-		Iterator observerIterator = this.observers.iterator();
+	protected void notifyObservers(Expression expression){
+		Iterator<Observer> observerIterator = this.observers.iterator();
 		while (observerIterator.hasNext()){
 			Observer current = (Observer)observerIterator.next();
-			current.update(value);
+			current.update(expression);
 		}
 	}
 }
