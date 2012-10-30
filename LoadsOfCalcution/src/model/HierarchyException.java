@@ -1,6 +1,6 @@
 package model;
 
-public class HierarchyException extends Error {
+public class HierarchyException extends Exception {
 
 	/**
 	 * 

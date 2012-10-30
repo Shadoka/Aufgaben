@@ -1,4 +1,4 @@
-package observer;
+package util;
 
 import java.util.List;
 import java.util.Vector;
@@ -34,6 +34,25 @@ public class Buffer<X extends BufferEntry> {
 			this.lock.unlock(); // 6
 		this.criticalSection.unlock();
 		return result; // 7
+	}
+	
+	public boolean isEmpty() {
+		return this.data.isEmpty();
+	}
+	
+	/**
+	 * Ugly method, just for testing purposes.
+	 * (I do know, that I cant test testcases with this method, which are expected to have the value -1)
+	 * @return : int
+	 */
+	public int getAsIntIfPossible() {
+		BufferEntry entry = (BufferEntry) this.get();
+		if (entry instanceof IntegerWrapper) {
+			return ((IntegerWrapper) entry).getValue();
+		} else {
+			System.out.println(entry instanceof StopCommand);
+			return -1;
+		}
 	}
 
 }

@@ -1,42 +1,48 @@
 package model;
 
-public abstract class AbstractExpression implements Expression {
+import util.Buffer;
+import util.BufferEntry;
 
-	private Expression left;
-	private Expression right;
+/**
+ * Class represents the abstract superclass of all expressions.
+ * Contains some additional fields all expressions have in common.
+ * @author Shadoka
+ *
+ */
+public abstract class AbstractExpression implements Expression, Runnable{
+
+	protected Buffer<BufferEntry> output;
+	private boolean alreadyRunned = false;
 	
-	protected AbstractExpression(Expression left, Expression right) {
-		this.left = left;
-		this.right = right;
+	protected AbstractExpression() {
+		this.output = new Buffer<BufferEntry>();
+	}
+	
+	/**
+	 * This method starts a new Thread containing itself as Runnable.
+	 */
+	public void start() {
+		Thread thread = new Thread(this);
+		thread.start();
+	}
+	
+	public boolean isAlreadyRunned() {
+		return alreadyRunned;
 	}
 
-	public Expression getLeft() {
-		return left;
+	public void setAlreadyRunned(boolean alreadyRunned) {
+		this.alreadyRunned = alreadyRunned;
+	}
+	
+	/**
+	 * Returns the outputbuffer of the expression.
+	 * @return : Buffer
+	 */
+	public Buffer<BufferEntry> getOutput() {
+		return this.output;
 	}
 
-	public void setLeft(Expression left) {
-		if (this.contains(left)) {
-			throw new Error(HierarchyException.create(HierarchyException.getErrormessage()));
-		} else {
-			this.left = left;
-		}
+	public void setOutput(Buffer<BufferEntry> output) {
+		this.output = output;
 	}
-
-	public Expression getRight() {
-		return right;
-	}
-
-	public void setRight(Expression right) {
-		if (this.contains(right)) {
-			throw new Error(HierarchyException.create(HierarchyException.getErrormessage()));
-		} else {
-			this.right = right;
-		}
-	}
-
-	@Override
-	public boolean contains(Expression e) {
-		return this.getLeft().contains(e) && this.getRight().contains(e);
-	}
-
 }
