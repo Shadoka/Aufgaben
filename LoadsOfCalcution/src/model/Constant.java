@@ -1,6 +1,6 @@
 package model;
 
-import util.Buffer;
+import state.Cached;
 import util.BufferEntry;
 import util.IntegerWrapper;
 
@@ -15,6 +15,8 @@ public class Constant extends AbstractExpression{
 	
 	private Constant(Integer value) {
 		this.value = value;
+		this.setAlreadyRunned(true);
+		this.setState(Cached.create(this, this.getState().getOutput()));
 	}
 	
 	public static Constant create(Integer value) {
@@ -40,11 +42,10 @@ public class Constant extends AbstractExpression{
 	public void run() {
 		this.setAlreadyRunned(true);
 	}
-	
+
 	@Override
-	public Buffer<BufferEntry> getOutput() {
-		this.output.put(IntegerWrapper.create(this.getValue()));
-		return this.output;
+	public BufferEntry get(int pointer) {
+		return IntegerWrapper.create(this.getValue());
 	}
 	
 }

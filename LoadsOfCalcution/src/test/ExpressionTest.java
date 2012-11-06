@@ -37,6 +37,7 @@ public class ExpressionTest {
 	Addition addComplex;
 	
 	Multiplication mult2;
+	Multiplication multSameObject;
 	
 	Multiplication multComplexLow;
 	Multiplication multComplexHigh;
@@ -88,73 +89,74 @@ public class ExpressionTest {
 		addComplex70 = Addition.create(addComplex68, var5);
 
 		mult2 = Multiplication.create(var1, var2);
-
 		
 		addComplex = Addition.create(var1, var2);
 		
 		multComplexLow = Multiplication.create(var3, var4);
 		
 		multComplexHigh = Multiplication.create(addComplex, multComplexLow);
+		
+		multSameObject = Multiplication.create(add3, add3);
 	}
 	
 	@Test
 	public void testVariables() {
-		assertEquals(1, var1.getOutput().getAsIntIfPossible());
-		assertEquals(23, var1.getOutput().getAsIntIfPossible());
-		assertEquals(stop, var1.getOutput().get());
-		assertEquals(2, var2.getOutput().getAsIntIfPossible());
-		assertEquals(42, var2.getOutput().getAsIntIfPossible());
-		assertEquals(stop, var2.getOutput().get());
-		assertEquals(23, var3.getOutput().getAsIntIfPossible());
-		assertEquals(1, var3.getOutput().getAsIntIfPossible());
-		assertEquals(stop, var3.getOutput().get());
-		assertEquals(42, var4.getOutput().getAsIntIfPossible());
-		assertEquals(2, var4.getOutput().getAsIntIfPossible());
-		assertEquals(stop, var4.getOutput().get());
+		assertEquals(1, var1.getState().getAsIntIfPossible(0));
+		assertEquals(23, var1.getState().getAsIntIfPossible(1));
+
+		assertEquals(2, var2.getState().getAsIntIfPossible(0));
+		assertEquals(42, var2.getState().getAsIntIfPossible(1));
+
+		assertEquals(23, var3.getState().getAsIntIfPossible(0));
+		assertEquals(1, var3.getState().getAsIntIfPossible(1));
+
+		assertEquals(42, var4.getState().getAsIntIfPossible(0));
+		assertEquals(2, var4.getState().getAsIntIfPossible(1));
+
 	}
 
 	@Test
 	public void testAdditionVariables() {
-		add3.start();
-		assertEquals(3, add3.getOutput().getAsIntIfPossible());
-		assertEquals(65, add3.getOutput().getAsIntIfPossible());
-		add25.start();
-		assertEquals(65, add25.getOutput().getAsIntIfPossible());
-		assertEquals(3, add25.getOutput().getAsIntIfPossible());
+		assertEquals(3, add3.getState().getAsIntIfPossible(0));
+		assertEquals(65, add3.getState().getAsIntIfPossible(1));
+		
+		assertEquals(65, add25.getState().getAsIntIfPossible(0));
+		assertEquals(3, add25.getState().getAsIntIfPossible(1));
 	}
 	
 	@Test
 	public void testAddConstants() {
-		addConstant.start();
-		assertEquals(5, addConstant.getOutput().getAsIntIfPossible());
-		assertEquals(27, addConstant.getOutput().getAsIntIfPossible());
+		assertEquals(5, addConstant.getState().getAsIntIfPossible(0));
+		assertEquals(27, addConstant.getState().getAsIntIfPossible(1));
 	}
 	
 	@Test
 	public void testAdditionAbstractExp() {
-		addComplex68.start();
-		assertEquals(68, addComplex68.getOutput().getAsIntIfPossible());
-		assertEquals(68, addComplex68.getOutput().getAsIntIfPossible());
+		assertEquals(68, addComplex68.getState().getAsIntIfPossible(0));
+		assertEquals(68, addComplex68.getState().getAsIntIfPossible(1));
 	}
 	
 	@Test
 	public void testAdditionAbstractExp2() {
-		addComplex70.start();
-		assertEquals(73, addComplex70.getOutput().getAsIntIfPossible());
-		assertEquals(75, addComplex70.getOutput().getAsIntIfPossible());
+		assertEquals(73, addComplex70.getState().getAsIntIfPossible(0));
+		assertEquals(75, addComplex70.getState().getAsIntIfPossible(1));
 	}
 	
 	@Test
 	public void testMultiplicationConstExp() {
-		mult2.start();
-		assertEquals(2, mult2.getOutput().getAsIntIfPossible());
-		assertEquals(966, mult2.getOutput().getAsIntIfPossible());
+		assertEquals(2, mult2.getState().getAsIntIfPossible(0));
+		assertEquals(966, mult2.getState().getAsIntIfPossible(1));
 	}
 	
 	@Test
 	public void testMultiplicationComplex() {
-		multComplexHigh.start();
-		assertEquals(2898, multComplexHigh.getOutput().getAsIntIfPossible());
-		assertEquals(130, multComplexHigh.getOutput().getAsIntIfPossible());
+		assertEquals(2898, multComplexHigh.getState().getAsIntIfPossible(0));
+		assertEquals(130, multComplexHigh.getState().getAsIntIfPossible(1));
+	}
+	
+	@Test
+	public void testExpressionWithSameObjects() {
+		assertEquals(9, multSameObject.getState().getAsIntIfPossible(0));
+		assertEquals(4225, multSameObject.getState().getAsIntIfPossible(1));
 	}
 }

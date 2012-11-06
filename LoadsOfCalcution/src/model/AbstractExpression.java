@@ -1,6 +1,7 @@
 package model;
 
-import util.Buffer;
+import state.NotCompletelyCached;
+import state.State;
 import util.BufferEntry;
 
 /**
@@ -11,11 +12,13 @@ import util.BufferEntry;
  */
 public abstract class AbstractExpression implements Expression, Runnable{
 
-	protected Buffer<BufferEntry> output;
+	protected State state;
 	private boolean alreadyRunned = false;
+	private int outputPointer = 0;
 	
 	protected AbstractExpression() {
-		this.output = new Buffer<BufferEntry>();
+		this.state = NotCompletelyCached.create(this);
+		this.start();
 	}
 	
 	/**
@@ -34,15 +37,21 @@ public abstract class AbstractExpression implements Expression, Runnable{
 		this.alreadyRunned = alreadyRunned;
 	}
 	
-	/**
-	 * Returns the outputbuffer of the expression.
-	 * @return : Buffer
-	 */
-	public Buffer<BufferEntry> getOutput() {
-		return this.output;
+	public abstract BufferEntry get(int pointer);
+
+	public int getOutputPointer() {
+		return outputPointer;
 	}
 
-	public void setOutput(Buffer<BufferEntry> output) {
-		this.output = output;
+	public void setOutputPointer(int outputPointer) {
+		this.outputPointer = outputPointer;
+	}
+
+	public State getState() {
+		return state;
+	}
+
+	public void setState(State state) {
+		this.state = state;
 	}
 }

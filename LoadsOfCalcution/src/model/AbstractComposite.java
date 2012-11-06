@@ -1,5 +1,7 @@
 package model;
 
+import state.Cached;
+import state.ConcreteIsNotCachedStateVisitor;
 import util.BufferEntry;
 import util.ConcreteBufferEntryStopVisitor;
 import util.ConcreteBufferEntryVisitor;
@@ -36,6 +38,7 @@ public abstract class AbstractComposite extends AbstractExpression {
 	@Override
 	public void run() {
 		this.setAlreadyRunned(true);
+		System.out.println(this.getLeft() + " + " + this.getRight());
 		while(true) {
 			if (!this.getLeft().isAlreadyRunned()) {
 				this.getLeft().start();
@@ -44,25 +47,37 @@ public abstract class AbstractComposite extends AbstractExpression {
 				this.getRight().start();
 			}
 			
+			while(this.getRight().getState().accept(ConcreteIsNotCachedStateVisitor.create()) ||
+					this.getLeft().getState().accept(ConcreteIsNotCachedStateVisitor.create())) { 
+				
+			}
+			System.out.println("Left: " + (this.getLeft().getState() instanceof Cached) + ", Right: "
+					 + (this.getRight().getState() instanceof Cached));
 			BufferEntry result = this.calculate();
-			this.getOutput().put(result);
+			this.getState().add(result);
 			if (result.accept(ConcreteBufferEntryStopVisitor.create())) {
-				System.out.println("ich war auch hier");
 				break;
 			}
 		}
+		this.setState(Cached.create(this, this.getState().getOutput()));
+		System.out.println(this.getState() instanceof Cached);
+		System.out.println("Bin fertig");
 	}
 	
 	@Override
 	public BufferEntry calculate() {
-		BufferEntry firstArgument = this.getLeft().getOutput().get();
-		BufferEntry secondArgument = this.getRight().getOutput().get();
+		System.out.println("outputpointer: " + this.getOutputPointer());
+		BufferEntry firstArgument = this.getLeft().get(this.getOutputPointer());
+		BufferEntry secondArgument = this.getRight().get(this.getOutputPointer());
 		
 		boolean stopLeft = firstArgument.accept(ConcreteBufferEntryStopVisitor.create());
 		boolean stopRight = secondArgument.accept(ConcreteBufferEntryStopVisitor.create());
 		
 		if (stopLeft || stopRight) {
+			this.setOutputPointer(0);
 			return StopCommand.create();
+		} else {
+			this.setOutputPointer(this.getOutputPointer() + 1);
 		}
 		
 		// Cast ist hässlich, aber ungefährlich dank obiger Überprüfung
@@ -74,8 +89,14 @@ public abstract class AbstractComposite extends AbstractExpression {
 		return result;
 	}
 	
+	@Override
+	public BufferEntry get(int pointer) {
+		BufferEntry result = this.getState().get(pointer);
+		return result;
+	}
+	
 	/**
-	 * Templatemethod, each child of this class will implement the calculation in its own way.
+	 * Templatemethod, all children of this class will implement the calculation in their own way.
 	 * @param left : IntegerWrapper
 	 * @param right : IntegerWrapper
 	 * @return : IntegerWrapper

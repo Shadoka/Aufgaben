@@ -1,6 +1,8 @@
 package model;
 
+import state.Cached;
 import util.BufferEntry;
+import util.ConcreteBufferEntryStopVisitor;
 
 /**
  * Represents a mathematical variable. It may have multiple values, but not necessary.
@@ -11,6 +13,8 @@ public class Variable extends AbstractExpression {
 	
 	private Variable() {
 		super();
+		this.setAlreadyRunned(true);
+		this.setState(Cached.create(this, this.getState().getOutput()));
 	}
 	
 	public static Variable create() {
@@ -28,12 +32,23 @@ public class Variable extends AbstractExpression {
 	 * @param value : BufferEntry
 	 */
 	public void add(BufferEntry value) {
-		this.getOutput().put(value);
+		this.getState().add(value);
+	}
+	
+	@Override
+	public BufferEntry get(int pointer) {
+		return this.getState().get(pointer);
 	}
 
 	@Override
 	public BufferEntry calculate() {
-		return this.getOutput().get();
+		BufferEntry result = this.get(this.getOutputPointer());
+		if (result.accept(ConcreteBufferEntryStopVisitor.create())) {
+			this.setOutputPointer(0);
+		} else {
+			this.setOutputPointer(this.getOutputPointer() + 1);
+		}
+		return result;
 	}
 
 	@Override
