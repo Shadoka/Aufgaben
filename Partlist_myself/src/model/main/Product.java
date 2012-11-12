@@ -1,8 +1,10 @@
 package model.main;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
+import model.main.process.MaterialmapProcess;
 import model.util.event.Event;
 import model.util.event.StructureChangedEvent;
 import model.util.observer.Observer;
@@ -13,39 +15,48 @@ import model.util.state.NotCached;
 import model.util.visitor.MaterialPriceStateVisitor;
 import model.util.visitor.MaterialStateVisitor;
 
-
 public class Product extends ComponentCommon implements Observer {
 
 	private static final String CycleMessage = "Zyklen sind in der Aufbaustruktur nicht erlaubt!";
-	
+
 	public static Product create(String name, int price) {
-		return new Product(name,new HashMap<String, QuantifiedComponent>(), price);
+		return new Product(name, new HashMap<String, QuantifiedComponent>(),
+				price);
 	}
-	
-	private final HashMap<String,QuantifiedComponent> components;
-	
-	private Product(String name, HashMap<String,QuantifiedComponent> components, int price) {
+
+	private final HashMap<String, QuantifiedComponent> components;
+
+	private Product(String name,
+			HashMap<String, QuantifiedComponent> components, int price) {
 		super(name, price);
 		this.components = components;
 	}
 
-	public void addPart(ComponentCommon part, int amount) throws Exception{
-		if (part.contains(this))throw new Exception(CycleMessage);
+	public void addPart(ComponentCommon part, int amount) throws Exception {
+		if (part.contains(this))
+			throw new Exception(CycleMessage);
 		final String partName = part.getName();
-		if (this.getComponents().containsKey(partName)){
-			final QuantifiedComponent oldQuantification = this.getComponents().get(partName); 
-			oldQuantification.setQuantity(oldQuantification.getQuantity() + amount);
-			this.notifyObservers(StructureChangedEvent.createStructureChangedEvent());
-		}else{
-			this.getComponents().put(partName, QuantifiedComponent.createQuantifiedComponent(amount, part));
+		if (this.getComponents().containsKey(partName)) {
+			final QuantifiedComponent oldQuantification = this.getComponents()
+					.get(partName);
+			oldQuantification.setQuantity(oldQuantification.getQuantity()
+					+ amount);
+			this.notifyObservers(StructureChangedEvent
+					.createStructureChangedEvent());
+		} else {
+			this.getComponents()
+					.put(partName,
+							QuantifiedComponent.createQuantifiedComponent(
+									amount, part));
 			part.register(this);
-			StructureChangedEvent e = StructureChangedEvent.createStructureChangedEvent();
+			StructureChangedEvent e = StructureChangedEvent
+					.createStructureChangedEvent();
 			this.getState().handleNotification(e);
 			this.notifyObservers(e);
 		}
 	}
 
-	private HashMap<String,QuantifiedComponent> getComponents() {
+	private HashMap<String, QuantifiedComponent> getComponents() {
 		return this.components;
 	}
 
@@ -53,8 +64,9 @@ public class Product extends ComponentCommon implements Observer {
 		if (this.equals(component)) {
 			return true;
 		}
-		Iterator<QuantifiedComponent> i = this.getComponents().values().iterator();
-		while (i.hasNext()){
+		Iterator<QuantifiedComponent> i = this.getComponents().values()
+				.iterator();
+		while (i.hasNext()) {
 			QuantifiedComponent current = i.next();
 			if (current.contains(component)) {
 				return true;
@@ -69,44 +81,54 @@ public class Product extends ComponentCommon implements Observer {
 
 	public int getNumberOfMaterials() {
 		int result = 0;
-		Iterator<QuantifiedComponent> i = this.getComponents().values().iterator();
-		while (i.hasNext()){
+		Iterator<QuantifiedComponent> i = this.getComponents().values()
+				.iterator();
+		while (i.hasNext()) {
 			QuantifiedComponent current = i.next();
 			result = result + current.getNumberOfMaterials();
 		}
 		return result;
 	}
-	
+
 	public Materialmap getMaterialList() {
 		return this.handleStateForMaterial(this.getState());
 	}
-	
+
 	private Materialmap calculateMaterialmap() {
 		Materialmap result = Materialmap.createMaterialmap();
-		Materialmap subcomponents = Materialmap.createMaterialmap(this.getComponents().values());
+		Materialmap subcomponents = Materialmap.createMaterialmap(this
+				.getComponents().values());
 		Iterator<QuantifiedComponent> i = subcomponents.values().iterator();
-		
+
 		while (i.hasNext()) {
-			QuantifiedComponent current = i.next();			
-			result = result.merge(current.getComponent().getMaterialList(), current.getQuantity());
+			QuantifiedComponent current = i.next();
+			MaterialmapProcess mapProcess = MaterialmapProcess.create(current
+					.getComponent());
+			mapProcess.run();
+			while (!mapProcess.isFinished()) {
+			}
+			Materialmap temporaryResult = mapProcess.getComp()
+					.getMaterialList();
+			result = result.merge(temporaryResult, current.getQuantity());
 		}
-		
+
 		return result;
 	}
-	
+
 	public int getOverallPrice() {
 		return this.handleStateForPrice(this.getState());
 	}
-	
+
 	private int calculateOverallPrice() {
 		int result = this.getPrice();
-		
+
 		Iterator<QuantifiedComponent> i = this.getDirectParts().iterator();
 		while (i.hasNext()) {
 			QuantifiedComponent current = i.next();
-			result += current.getComponent().getOverallPrice() * current.getQuantity();
+			result += current.getComponent().getOverallPrice()
+					* current.getQuantity();
 		}
-		
+
 		return result;
 	}
 
@@ -114,14 +136,15 @@ public class Product extends ComponentCommon implements Observer {
 	public void update(Event e) {
 		this.getState().handleNotification(e);
 	}
-	
+
 	public Materialmap handleStateForMaterial(AbstractState state) {
 		return state.accept(new MaterialStateVisitor() {
 
 			@Override
 			public Materialmap visit(NotCached state) {
 				Materialmap map = Product.this.calculateMaterialmap();
-				Product.this.setState(MaterialCached.createMaterialCached(Product.this, map));
+				Product.this.setState(MaterialCached.createMaterialCached(
+						Product.this, map));
 				return map;
 			}
 
@@ -134,25 +157,28 @@ public class Product extends ComponentCommon implements Observer {
 			public Materialmap visit(MaterialPriceCached state) {
 				return state.getMaterials();
 			}
-			
+
 		});
 	}
-	
+
 	public int handleStateForPrice(AbstractState state) {
 		return state.accept(new MaterialPriceStateVisitor() {
 
 			@Override
 			public int visit(NotCached state) {
 				int price = Product.this.calculateOverallPrice();
-//				Materialmap map = Product.this.calculateMaterialmap();
-//				Product.this.setState(MaterialPriceCached.createMaterialPriceCached(Product.this, map, price));
+				// Materialmap map = Product.this.calculateMaterialmap();
+				// Product.this.setState(MaterialPriceCached.createMaterialPriceCached(Product.this,
+				// map, price));
 				return price;
 			}
 
 			@Override
 			public int visit(MaterialCached state) {
 				int price = Product.this.calculateOverallPrice();
-				Product.this.setState(MaterialPriceCached.createMaterialPriceCached(Product.this, Product.this.getMaterialList(), price));
+				Product.this.setState(MaterialPriceCached
+						.createMaterialPriceCached(Product.this,
+								Product.this.getMaterialList(), price));
 				return price;
 			}
 
@@ -160,7 +186,7 @@ public class Product extends ComponentCommon implements Observer {
 			public int visit(MaterialPriceCached state) {
 				return state.getOverallPrice();
 			}
-			
+
 		});
 	}
 }
