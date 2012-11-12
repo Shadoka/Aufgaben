@@ -95,6 +95,7 @@ public class Product extends ComponentCommon implements Observer {
 	}
 
 	private Materialmap calculateMaterialmap() {
+		this.startMaterialThreads();
 		Materialmap result = Materialmap.createMaterialmap();
 		Materialmap subcomponents = Materialmap.createMaterialmap(this
 				.getComponents().values());
@@ -102,17 +103,23 @@ public class Product extends ComponentCommon implements Observer {
 
 		while (i.hasNext()) {
 			QuantifiedComponent current = i.next();
-			MaterialmapProcess mapProcess = MaterialmapProcess.create(current
-					.getComponent());
-			mapProcess.run();
-			while (!mapProcess.isFinished()) {
-			}
-			Materialmap temporaryResult = mapProcess.getComp()
-					.getMaterialList();
-			result = result.merge(temporaryResult, current.getQuantity());
+
+			result = result.merge(current.getComponent().getMaterialList(),
+					current.getQuantity());
 		}
 
 		return result;
+	}
+
+	private void startMaterialThreads() {
+		Iterator<QuantifiedComponent> i = this.getComponents().values()
+				.iterator();
+		while (i.hasNext()) {
+			QuantifiedComponent current = i.next();
+			MaterialmapProcess process = MaterialmapProcess.create(current
+					.getComponent());
+			process.run();
+		}
 	}
 
 	public int getOverallPrice() {
