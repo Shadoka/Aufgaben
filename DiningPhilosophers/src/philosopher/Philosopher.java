@@ -10,14 +10,18 @@ import util.StateVisitor;
 public class Philosopher implements Runnable {
 
 	private State state;
+	private Token left;
+	private Token right;
 
-	private Philosopher() {
+	private Philosopher(Token left, Token right) {
 		System.out.println("Wurde als denkend initialisiert");
 		this.state = ThinkingState.create(this);
+		this.left = left;
+		this.right = right;
 	}
 
-	public static Philosopher create() {
-		return new Philosopher();
+	public static Philosopher create(Token left, Token right) {
+		return new Philosopher(left, right);
 	}
 
 	@Override
@@ -32,15 +36,7 @@ public class Philosopher implements Runnable {
 
 	private synchronized void waitWithTime(long wait) {
 		try {
-
-			System.out.println("davor");
-			System.out.println("Soll:" + wait);
-			long before = System.nanoTime();
 			Thread.sleep(wait);
-			long slept = System.nanoTime() - before;
-			System.out.println("danach");
-			System.out.println("Ist:" + slept * 1e-6);// Umrechnen von ns in ms
-
 		} catch (InterruptedException e) {
 			System.out.println("bin ich hier?");
 		}
@@ -66,17 +62,29 @@ public class Philosopher implements Runnable {
 			@Override
 			public State visit(EatingState state) {
 				System.out.println("Wechsle in: denkend");
+				Philosopher.this.reportMeThinking();
 				return ThinkingState.create(Philosopher.this);
 			}
 
 			@Override
 			public State visit(ThinkingState state) {
 				System.out.println("Wechsle in: essend");
+				Philosopher.this.reportMeEating();
 				return EatingState.create(Philosopher.this);
 			}
 
 		}));
 	}
+
+	public void reportMeThinking() {
+		PTOMonitor.getInstance().addThinking(this);
+	}
+
+	public void reportMeEating() {
+		PTOMonitor.getInstance().addEating(this);
+	}
+
+	/*********** Getter and Setter ***********/
 
 	public State getState() {
 		return state;
@@ -84,5 +92,21 @@ public class Philosopher implements Runnable {
 
 	public void setState(State state) {
 		this.state = state;
+	}
+
+	public Token getLeft() {
+		return left;
+	}
+
+	public void setLeft(Token left) {
+		this.left = left;
+	}
+
+	public Token getRight() {
+		return right;
+	}
+
+	public void setRight(Token right) {
+		this.right = right;
 	}
 }
