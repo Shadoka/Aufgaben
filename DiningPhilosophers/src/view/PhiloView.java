@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import philosopher.PTOMonitor;
+import util.WatchingThread;
 
 public class PhiloView extends JFrame {
 
@@ -169,6 +170,8 @@ public class PhiloView extends JFrame {
 				PTOMonitor.getInstance().startAllPhilosophers(
 						PhiloView.this.getTokenCare().isSelected());
 				PTOMonitor.getInstance().setRunning(true);
+				WatchingThread watch = WatchingThread.create();
+				watch.start();
 			}
 		}
 	}
