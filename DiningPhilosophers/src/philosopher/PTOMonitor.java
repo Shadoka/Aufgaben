@@ -8,10 +8,12 @@ public class PTOMonitor {
 
 	private Vector<Philosopher> thinking;
 	private Vector<Philosopher> eating;
+	private long waitingTime;
 
 	private PTOMonitor() {
 		this.thinking = new Vector<>();
 		this.eating = new Vector<>();
+		this.waitingTime = 5000;
 	}
 
 	public static PTOMonitor getInstance() {
@@ -33,6 +35,11 @@ public class PTOMonitor {
 			this.getThinking().remove(p);
 		}
 		this.getEating().add(p);
+		this.checkPTO();
+	}
+
+	private void checkPTO() {
+
 	}
 
 	/************** Getter and Setter **********/
@@ -51,5 +58,13 @@ public class PTOMonitor {
 
 	public void setThinking(Vector<Philosopher> thinking) {
 		this.thinking = thinking;
+	}
+
+	public long getWaitingTime() {
+		return waitingTime;
+	}
+
+	public void setWaitingTime(long waitingTime) {
+		this.waitingTime = waitingTime;
 	}
 }
