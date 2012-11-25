@@ -1,5 +1,6 @@
 package philosopher;
 
+import java.util.Iterator;
 import java.util.Vector;
 
 public class PTOMonitor {
@@ -9,11 +10,13 @@ public class PTOMonitor {
 	private Vector<Philosopher> thinking;
 	private Vector<Philosopher> eating;
 	private long waitingTime;
+	private boolean isRunning;
 
 	private PTOMonitor() {
 		this.thinking = new Vector<>();
 		this.eating = new Vector<>();
 		this.waitingTime = 5000;
+		this.isRunning = false;
 	}
 
 	public static PTOMonitor getInstance() {
@@ -21,6 +24,35 @@ public class PTOMonitor {
 			instance = new PTOMonitor();
 		}
 		return instance;
+	}
+
+	public void addPhilosophers(int count) {
+		for (int i = 0; i < count; i++) {
+			if (this.getThinking().isEmpty()) {
+				Token left = Token.create();
+				Token right = Token.create();
+				Philosopher phil = Philosopher.create(left, right);
+				this.getThinking().add(phil);
+			} else {
+				Philosopher before = this.getThinking().get(
+						this.getThinking().size() - 1);
+				Token right = Token.create();
+				Philosopher next = Philosopher.create(before.getLeft(), right);
+				this.getThinking().add(next);
+			}
+		}
+	}
+
+	public void startAllPhilosophers(boolean tokenCare) {
+		if (tokenCare) {
+
+		} else {
+			Iterator<Philosopher> i = this.getThinking().iterator();
+			while (i.hasNext()) {
+				Philosopher current = i.next();
+				current.start();
+			}
+		}
 	}
 
 	public void addThinking(Philosopher p) {
@@ -66,5 +98,13 @@ public class PTOMonitor {
 
 	public void setWaitingTime(long waitingTime) {
 		this.waitingTime = waitingTime;
+	}
+
+	public boolean isRunning() {
+		return isRunning;
+	}
+
+	public void setRunning(boolean isRunning) {
+		this.isRunning = isRunning;
 	}
 }
