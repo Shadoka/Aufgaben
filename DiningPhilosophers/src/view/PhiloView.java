@@ -58,6 +58,7 @@ public class PhiloView extends JFrame {
 		this.getContentPane().add(this.startButton);
 		this.startButton.setBounds(50, 430, 140, 30);
 		this.stopButton = new JButton("Simulation stoppen");
+		this.stopButton.addActionListener(new StopButtonListener());
 		this.getContentPane().add(this.stopButton);
 		this.stopButton.setBounds(400, 430, 150, 30);
 		this.countPhilo = new JTextField("");
@@ -89,6 +90,7 @@ public class PhiloView extends JFrame {
 		this.getContentPane().add(this.maxLabel);
 		this.maxLabel.setBounds(100, 370, 260, 30);
 		this.maxPhilo = new JTextField("0");
+		this.maxPhilo.setEditable(false);
 		this.getContentPane().add(this.maxPhilo);
 		this.maxPhilo.setBounds(370, 370, 50, 30);
 		this.averageLabel = new JLabel(
@@ -96,6 +98,7 @@ public class PhiloView extends JFrame {
 		this.getContentPane().add(this.averageLabel);
 		this.averageLabel.setBounds(60, 300, 300, 30);
 		this.averagePhilo = new JTextField("0");
+		this.averagePhilo.setEditable(false);
 		this.getContentPane().add(this.averagePhilo);
 		this.averagePhilo.setBounds(370, 300, 50, 30);
 		this.tokenCare = new JCheckBox("Philosophen kümmern sich um Tokens");
@@ -174,6 +177,18 @@ public class PhiloView extends JFrame {
 				watch.start();
 			}
 		}
+	}
+
+	public class StopButtonListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			for (int i = 0; i < PTOMonitor.getInstance().getThinking().size(); i++) {
+				PTOMonitor.getInstance().getThinking().get(i).stop();
+			}
+			PTOMonitor.getInstance().setRunning(false);
+		}
+
 	}
 
 	/******** Getter and Setter *************/

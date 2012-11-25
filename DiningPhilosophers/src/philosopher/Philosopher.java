@@ -1,21 +1,26 @@
 package philosopher;
 
-import state.EatingState;
 import state.State;
 import state.ThinkingState;
-import util.StateVisitor;
+import behaviour.BehaviourPattern;
 
 public class Philosopher implements Runnable {
 
+	private static int id = 0;
+
+	private int myId;
 	private State state;
+	private BehaviourPattern behaviour;
 	private Token left;
 	private Token right;
+	private boolean sittingAtTable = false;
 
 	private Philosopher(Token left, Token right) {
-		System.out.println("Wurde als denkend initialisiert");
 		this.state = ThinkingState.create(this);
 		this.left = left;
 		this.right = right;
+		this.myId = id;
+		id++;
 	}
 
 	public static Philosopher create(Token left, Token right) {
@@ -24,7 +29,7 @@ public class Philosopher implements Runnable {
 
 	@Override
 	public void run() {
-		while (true) {
+		while (sittingAtTable) {
 			this.waitWithTime(PTOMonitor.getInstance().getWaitingTime());
 			this.changeState();
 		}
@@ -34,33 +39,22 @@ public class Philosopher implements Runnable {
 		try {
 			Thread.sleep(wait);
 		} catch (InterruptedException e) {
-			System.out.println("bin ich hier?");
 		}
 	}
 
 	public void start() {
+		this.setSittingAtTable(true);
 		Thread thread = new Thread(this);
 		thread.start();
 	}
 
+	public void stop() {
+		this.setSittingAtTable(false);
+	}
+
 	private void changeState() {
-		this.setState(this.getState().accept(new StateVisitor() {
-
-			@Override
-			public State visit(EatingState state) {
-				System.out.println("Wechsle in: denkend");
-				Philosopher.this.reportMeThinking();
-				return ThinkingState.create(Philosopher.this);
-			}
-
-			@Override
-			public State visit(ThinkingState state) {
-				System.out.println("Wechsle in: essend");
-				Philosopher.this.reportMeEating();
-				return EatingState.create(Philosopher.this);
-			}
-
-		}));
+		System.out.println("statewechsel");
+		this.getBehaviour().changeState(this);
 	}
 
 	public void reportMeThinking() {
@@ -95,5 +89,33 @@ public class Philosopher implements Runnable {
 
 	public void setRight(Token right) {
 		this.right = right;
+	}
+
+	private static void setId(int id) {
+		Philosopher.id = id;
+	}
+
+	public int getMyId() {
+		return myId;
+	}
+
+	public void setMyId(int myId) {
+		this.myId = myId;
+	}
+
+	public BehaviourPattern getBehaviour() {
+		return behaviour;
+	}
+
+	public void setBehaviour(BehaviourPattern behaviour) {
+		this.behaviour = behaviour;
+	}
+
+	public boolean isSittingAtTable() {
+		return sittingAtTable;
+	}
+
+	public void setSittingAtTable(boolean sittingAtTable) {
+		this.sittingAtTable = sittingAtTable;
 	}
 }

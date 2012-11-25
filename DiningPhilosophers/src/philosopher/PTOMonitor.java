@@ -3,6 +3,9 @@ package philosopher;
 import java.util.Iterator;
 import java.util.Vector;
 
+import behaviour.DontCareBehaviour;
+import behaviour.TokenCareBehaviour;
+
 public class PTOMonitor {
 
 	private static PTOMonitor instance = null;
@@ -45,11 +48,17 @@ public class PTOMonitor {
 
 	public void startAllPhilosophers(boolean tokenCare) {
 		if (tokenCare) {
-
+			Iterator<Philosopher> i = this.getThinking().iterator();
+			while (i.hasNext()) {
+				Philosopher current = i.next();
+				current.setBehaviour(TokenCareBehaviour.create());
+				current.start();
+			}
 		} else {
 			Iterator<Philosopher> i = this.getThinking().iterator();
 			while (i.hasNext()) {
 				Philosopher current = i.next();
+				current.setBehaviour(DontCareBehaviour.create());
 				current.start();
 			}
 		}
@@ -67,11 +76,20 @@ public class PTOMonitor {
 			this.getThinking().remove(p);
 		}
 		this.getEating().add(p);
-		this.checkPTO();
+		// this.checkPTO(p);
 	}
 
-	private void checkPTO() {
-
+	private void checkPTO(Philosopher p) {
+		Iterator<Philosopher> i = this.getEating().iterator();
+		while (i.hasNext()) {
+			Philosopher current = i.next();
+			if (current.getMyId() == p.getMyId() - 1
+					|| current.getMyId() == p.getMyId() + 1) {
+				System.out.println("Philosoph " + p.getMyId()
+						+ " verstößt mit " + current.getMyId()
+						+ " gegen die PTO!");
+			}
+		}
 	}
 
 	/************** Getter and Setter **********/
