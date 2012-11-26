@@ -1,5 +1,7 @@
 package philosopher;
 
+import java.util.Random;
+
 import state.State;
 import state.ThinkingState;
 import behaviour.BehaviourPattern;
@@ -29,10 +31,22 @@ public class Philosopher implements Runnable {
 
 	@Override
 	public void run() {
+		long wait;
 		while (sittingAtTable) {
-			this.waitWithTime(PTOMonitor.getInstance().getWaitingTime());
+			wait = this.getWaitingTime(PTOMonitor.getInstance()
+					.getWaitingTime());
+			this.waitWithTime(wait);
 			this.changeState();
 		}
+	}
+
+	private long getWaitingTime(long modulo) {
+		Random rnd = new Random();
+		long result = rnd.nextLong() % modulo;
+		if (result <= 0) {
+			result = result * -1 + 1;
+		}
+		return result;
 	}
 
 	private synchronized void waitWithTime(long wait) {
