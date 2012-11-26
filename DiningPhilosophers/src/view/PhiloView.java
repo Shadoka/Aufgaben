@@ -12,6 +12,7 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
+import philosopher.PTOMonitor;
 import philosopher.PhiloManager;
 import util.WatchingThread;
 
@@ -194,6 +195,7 @@ public class PhiloView extends JFrame {
 				PhiloManager.getInstance().setRunning(true);
 				WatchingThread watch = WatchingThread.create();
 				watch.start();
+				PTOMonitor.getInstance().start();
 			}
 		}
 	}

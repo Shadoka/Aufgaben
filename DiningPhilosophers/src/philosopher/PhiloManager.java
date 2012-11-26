@@ -78,6 +78,7 @@ public class PhiloManager {
 			this.getEating().remove(p);
 		}
 		this.getThinking().add(p);
+		PTOMonitor.getInstance().getEating().remove(p);
 	}
 
 	public void addEating(Philosopher p) {
@@ -85,7 +86,7 @@ public class PhiloManager {
 			this.getThinking().remove(p);
 		}
 		this.getEating().add(p);
-		// this.checkPTO(p);
+		PTOMonitor.getInstance().getEaters().put(p);
 	}
 
 	private void checkPTO(Philosopher p) {

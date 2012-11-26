@@ -67,7 +67,6 @@ public class Philosopher implements Runnable {
 	}
 
 	private void changeState() {
-		System.out.println("statewechsel");
 		this.getBehaviour().changeState(this);
 	}
 
