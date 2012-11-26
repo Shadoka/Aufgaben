@@ -3,13 +3,16 @@ package view;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
-import philosopher.PTOMonitor;
+import philosopher.PhiloManager;
 import util.WatchingThread;
 
 public class PhiloView extends JFrame {
@@ -35,6 +38,9 @@ public class PhiloView extends JFrame {
 	private JLabel averageLabel;
 	private JTextField averagePhilo;
 	private JCheckBox tokenCare;
+	private JList<String> errorList;
+	private DefaultListModel<String> listModel;
+	private JScrollPane scrollPane;
 
 	private PhiloView() {
 		this.initializeUI();
@@ -104,6 +110,13 @@ public class PhiloView extends JFrame {
 		this.tokenCare = new JCheckBox("Philosophen kümmern sich um Tokens");
 		this.getContentPane().add(this.tokenCare);
 		this.tokenCare.setBounds(50, 150, 250, 30);
+		this.listModel = new DefaultListModel<>();
+
+		this.errorList = new JList<String>();
+		this.errorList.setModel(this.listModel);
+		this.scrollPane = new JScrollPane(this.errorList);
+		this.getContentPane().add(this.scrollPane);
+		this.scrollPane.setBounds(50, 190, 500, 100);
 
 		this.updateCountPhilo();
 		this.setResizable(false);
@@ -111,8 +124,8 @@ public class PhiloView extends JFrame {
 	}
 
 	private void updateCountPhilo() {
-		int result = PTOMonitor.getInstance().getThinking().size()
-				+ PTOMonitor.getInstance().getEating().size();
+		int result = PhiloManager.getInstance().getThinking().size()
+				+ PhiloManager.getInstance().getEating().size();
 		this.countPhilo.setText("" + result);
 	}
 
@@ -125,7 +138,13 @@ public class PhiloView extends JFrame {
 	}
 
 	private void setWaitingTime(long wait) {
-		PTOMonitor.getInstance().setWaitingTime(wait);
+		PhiloManager.getInstance().setWaitingTime(wait);
+	}
+
+	public void reportBadBehaviour(int badPhilo1, int badPhilo2) {
+		this.getListModel().addElement(
+				"Verstoß: Philosoph " + badPhilo1 + " und Philosoph "
+						+ badPhilo2 + " essen gleichzeitig!");
 	}
 
 	public static boolean isNumeric(String string) {
@@ -156,7 +175,7 @@ public class PhiloView extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (PhiloView.isNumeric(PhiloView.this.getAmountPhilo().getText())) {
-				PTOMonitor.getInstance().addPhilosophers(
+				PhiloManager.getInstance().addPhilosophers(
 						Integer.parseInt(PhiloView.this.getAmountPhilo()
 								.getText()));
 				PhiloView.this.getAmountPhilo().setText("");
@@ -169,10 +188,10 @@ public class PhiloView extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (!PTOMonitor.getInstance().isRunning()) {
-				PTOMonitor.getInstance().startAllPhilosophers(
+			if (!PhiloManager.getInstance().isRunning()) {
+				PhiloManager.getInstance().startAllPhilosophers(
 						PhiloView.this.getTokenCare().isSelected());
-				PTOMonitor.getInstance().setRunning(true);
+				PhiloManager.getInstance().setRunning(true);
 				WatchingThread watch = WatchingThread.create();
 				watch.start();
 			}
@@ -183,10 +202,10 @@ public class PhiloView extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			for (int i = 0; i < PTOMonitor.getInstance().getThinking().size(); i++) {
-				PTOMonitor.getInstance().getThinking().get(i).stop();
+			for (int i = 0; i < PhiloManager.getInstance().getThinking().size(); i++) {
+				PhiloManager.getInstance().getThinking().get(i).stop();
 			}
-			PTOMonitor.getInstance().setRunning(false);
+			PhiloManager.getInstance().setRunning(false);
 		}
 
 	}
@@ -303,6 +322,30 @@ public class PhiloView extends JFrame {
 
 	public void setTokenCare(JCheckBox tokenCare) {
 		this.tokenCare = tokenCare;
+	}
+
+	public JList<String> getErrorList() {
+		return errorList;
+	}
+
+	public void setErrorList(JList<String> errorList) {
+		this.errorList = errorList;
+	}
+
+	public DefaultListModel<String> getListModel() {
+		return listModel;
+	}
+
+	public void setListModel(DefaultListModel<String> listModel) {
+		this.listModel = listModel;
+	}
+
+	public JScrollPane getScrollPane() {
+		return scrollPane;
+	}
+
+	public void setScrollPane(JScrollPane scrollPane) {
+		this.scrollPane = scrollPane;
 	}
 
 }

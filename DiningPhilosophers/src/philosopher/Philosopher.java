@@ -33,7 +33,7 @@ public class Philosopher implements Runnable {
 	public void run() {
 		long wait;
 		while (sittingAtTable) {
-			wait = this.getWaitingTime(PTOMonitor.getInstance()
+			wait = this.getWaitingTime(PhiloManager.getInstance()
 					.getWaitingTime());
 			this.waitWithTime(wait);
 			this.changeState();
@@ -72,11 +72,11 @@ public class Philosopher implements Runnable {
 	}
 
 	public void reportMeThinking() {
-		PTOMonitor.getInstance().addThinking(this);
+		PhiloManager.getInstance().addThinking(this);
 	}
 
 	public void reportMeEating() {
-		PTOMonitor.getInstance().addEating(this);
+		PhiloManager.getInstance().addEating(this);
 	}
 
 	/*********** Getter and Setter ***********/

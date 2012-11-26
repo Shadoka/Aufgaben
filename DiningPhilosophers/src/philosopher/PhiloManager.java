@@ -6,25 +6,25 @@ import java.util.Vector;
 import behaviour.DontCareBehaviour;
 import behaviour.TokenCareBehaviour;
 
-public class PTOMonitor {
+public class PhiloManager {
 
-	private static PTOMonitor instance = null;
+	private static PhiloManager instance = null;
 
 	private Vector<Philosopher> thinking;
 	private Vector<Philosopher> eating;
 	private long waitingTime;
 	private boolean isRunning;
 
-	private PTOMonitor() {
+	private PhiloManager() {
 		this.thinking = new Vector<>();
 		this.eating = new Vector<>();
 		this.waitingTime = 5000;
 		this.isRunning = false;
 	}
 
-	public static PTOMonitor getInstance() {
+	public static PhiloManager getInstance() {
 		if (instance == null) {
-			instance = new PTOMonitor();
+			instance = new PhiloManager();
 		}
 		return instance;
 	}
@@ -37,11 +37,20 @@ public class PTOMonitor {
 				Philosopher phil = Philosopher.create(left, right);
 				this.getThinking().add(phil);
 			} else {
-				Philosopher before = this.getThinking().get(
-						this.getThinking().size() - 1);
-				Token right = Token.create();
-				Philosopher next = Philosopher.create(before.getLeft(), right);
-				this.getThinking().add(next);
+				if (i == count - 1) {
+					Philosopher before = this.getThinking().get(
+							this.getThinking().size() - 1);
+					Philosopher next = Philosopher.create(this.getThinking()
+							.get(0).getRight(), before.getLeft());
+					this.getThinking().add(next);
+				} else {
+					Philosopher before = this.getThinking().get(
+							this.getThinking().size() - 1);
+					Token left = Token.create();
+					Philosopher next = Philosopher.create(left,
+							before.getLeft());
+					this.getThinking().add(next);
+				}
 			}
 		}
 	}

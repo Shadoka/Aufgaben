@@ -1,6 +1,6 @@
 package util;
 
-import philosopher.PTOMonitor;
+import philosopher.PhiloManager;
 import view.PhiloView;
 
 public class WatchingThread implements Runnable {
@@ -19,9 +19,9 @@ public class WatchingThread implements Runnable {
 
 	@Override
 	public void run() {
-		while (PTOMonitor.getInstance().isRunning()) {
+		while (PhiloManager.getInstance().isRunning()) {
 			this.setRepetition(this.getRepetition() + 1);
-			int eating = PTOMonitor.getInstance().getEating().size();
+			int eating = PhiloManager.getInstance().getEating().size();
 			if (eating > Integer.parseInt(PhiloView.getInstance().getMaxPhilo()
 					.getText())) {
 				PhiloView.getInstance().updateMaxPhilo(eating);
