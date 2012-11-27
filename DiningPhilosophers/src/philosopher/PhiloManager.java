@@ -38,14 +38,12 @@ public class PhiloManager {
 				this.getThinking().add(phil);
 			} else {
 				if (i == count - 1) {
-					Philosopher before = this.getThinking().get(
-							this.getThinking().size() - 1);
+					Philosopher before = this.getThinking().get(i - 1);
 					Philosopher next = Philosopher.create(this.getThinking()
 							.get(0).getRight(), before.getLeft());
 					this.getThinking().add(next);
 				} else {
-					Philosopher before = this.getThinking().get(
-							this.getThinking().size() - 1);
+					Philosopher before = this.getThinking().get(i - 1);
 					Token left = Token.create();
 					Philosopher next = Philosopher.create(left,
 							before.getLeft());
@@ -87,19 +85,6 @@ public class PhiloManager {
 		}
 		this.getEating().add(p);
 		PTOMonitor.getInstance().getEaters().put(p);
-	}
-
-	private void checkPTO(Philosopher p) {
-		Iterator<Philosopher> i = this.getEating().iterator();
-		while (i.hasNext()) {
-			Philosopher current = i.next();
-			if (current.getMyId() == p.getMyId() - 1
-					|| current.getMyId() == p.getMyId() + 1) {
-				System.out.println("Philosoph " + p.getMyId()
-						+ " verstößt mit " + current.getMyId()
-						+ " gegen die PTO!");
-			}
-		}
 	}
 
 	/************** Getter and Setter **********/
